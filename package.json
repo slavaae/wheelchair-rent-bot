@@ -1,0 +1,14 @@
+{
+  "name": "wheelchair-rent-bot",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@grammyjs/conversations": "^1.2.0",
+    "dotenv": "^16.4.5",
+    "googleapis": "^134.0.0",
+    "grammy": "^1.21.1"
+  }
+}
