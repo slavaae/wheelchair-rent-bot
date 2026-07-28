@@ -6,7 +6,7 @@ require('dotenv').config();
 const bot = new Bot(process.env.BOT_TOKEN);
 
 // -------------------------------------------------------------
-// 1. СЕССИИ
+// 1. СЕССИИ (Хранение состояния)
 // -------------------------------------------------------------
 bot.use(
   session({
@@ -37,18 +37,23 @@ async function notifyAdminLog(ctx, actionText) {
 }
 
 // -------------------------------------------------------------
-// 📦 БАЗА ДАННЫХ МОДЕЛЕЙ И ЦЕН (HD ФОТО С POSTIMAGES)
+// 📦 БАЗА ДАННЫХ МОДЕЛЕЙ И ЦЕН (С ХАРАКТЕРИСТИКАМИ ИЗ ИНФОГРАФИКИ)
 // -------------------------------------------------------------
 const MODELS_INFO = {
   'ortonica620': {
-    name: 'Ортоника 620',
+    name: 'Ортоника Pulse 620',
     photos: [
-      'https://i.postimg.cc/jS2d7GwQ/1.png',
-      'https://i.postimg.cc/zGvXg9bp/3.png',
-      'https://i.postimg.cc/htvPdHz3/4.png',
-      'https://i.postimg.cc/Dw0yXtJp/6.png',
+      'ЗАМЕНИТЕ_НА_FILE_ID_1',
+      'ЗАМЕНИТЕ_НА_FILE_ID_2',
+      'ЗАМЕНИТЕ_НА_FILE_ID_3',
+      'ЗАМЕНИТЕ_НА_FILE_ID_4',
     ],
-    specs: '🚀 Скорость: 6 км/ч\n⚡ Запас хода: 20 км\n⚖️ Вес: 26 кг\n🏋️ Макс. нагрузка: 120 кг\n🟢 Доступная стоимость. Прочная конструкция, которую сложно повредить.',
+    specs: 
+      '🚀 Скорость: 6 км/ч | ⚡ Запас хода: до 20 км\n' +
+      '🔋 АКБ: литиевый 2×12 Ah | ⚙️ Двигатели: 2×250 W\n' +
+      '🛋 Подвеска: независимая передних колес | Откидные подлокотники\n' +
+      '🪶 Маленький вес: всего 26 кг! | 📐 Ширина сиденья: 45.5 см\n' +
+      '📦 Складывание «книжка»: общая ширина 54.5 см (пройдет в любой проем)',
     prices: {
       '1d': { name: '1 день', price: 2088, daily: 2088 },
       '3d': { name: '3 дня', price: 4475, daily: 1492 },
@@ -59,13 +64,18 @@ const MODELS_INFO = {
     }
   },
   'ortonica650': {
-    name: 'Ортоника 650',
+    name: 'Ортоника Pulse 650',
     photos: [
-      'https://i.postimg.cc/Bb3nPbH8/6628939200.jpg',
-      'https://i.postimg.cc/Hnmk8nXQ/orig.jpg',
-      'https://i.postimg.cc/902Qw0Zy/Snimok.png',
+      'ЗАМЕНИТЕ_НА_FILE_ID_1',
+      'ЗАМЕНИТЕ_НА_FILE_ID_2',
+      'ЗАМЕНИТЕ_НА_FILE_ID_3',
     ],
-    specs: '🚀 Скорость: 6 км/ч\n⚡ Запас хода: 20 км\n⚖️ Вес: 23 кг\n🏋️ Макс. нагрузка: 130 кг\n🟢 Самая компактная модель. Идеальна для квартиры.',
+    specs: 
+      '🚀 Скорость: 6 км/ч | ⚡ Запас хода: до 20 км\n' +
+      '🔋 АКБ: литиевый 2×12 Ah | ⚙️ Двигатель: 2×250 W\n' +
+      '🛏 Угол наклона спинки: 90°–150° (есть подголовник)\n' +
+      '📦 Складывание «книжка»: высота в сложенном виде всего 40 см!\n' +
+      '🏋️ Нагрузка: 130 кг | 📐 Ширина сиденья: 45 см | ⚖️ Вес: 33.5 кг',
     prices: {
       '1d': { name: '1 день', price: 2334, daily: 2334 },
       '3d': { name: '3 дня', price: 5002, daily: 1667 },
@@ -76,14 +86,18 @@ const MODELS_INFO = {
     }
   },
   'ortonica690': {
-    name: 'Ортоника 690',
+    name: 'Ортоника Pulse 690',
     photos: [
-      'https://i.postimg.cc/6QT2B8L1/1.png',
-      'https://i.postimg.cc/zf3bqyS6/10.png',
-      'https://i.postimg.cc/FK1dhYgM/2.png',
-      'https://i.postimg.cc/1z4ny8cT/4.png',
+      'ЗАМЕНИТЕ_НА_FILE_ID_1',
+      'ЗАМЕНИТЕ_НА_FILE_ID_2',
+      'ЗАМЕНИТЕ_НА_FILE_ID_3',
     ],
-    specs: '🚀 Скорость: 8 км/ч\n⚡ Запас хода: 20 км\n⚖️ Вес: 25 кг\n🏋️ Макс. нагрузка: 150 кг\n🟢 Стильное кресло с приятной эргономикой.',
+    specs: 
+      '🚀 Скорость: до 8 км/ч | ⚡ Запас хода: до 20 км\n' +
+      '⏱ Складывание: за 3 секунды (механизм книжка)\n' +
+      '💡 Освещение: фонарик с сенсорным управлением + световая панель АКБ\n' +
+      '⚙️ Двигатель: 2×250 W | 🏋️ Нагрузка: 150 кг (усиленная рама)\n' +
+      '⚖️ Вес: 25 кг | 📏 Высота в сложенном виде: всего 45.5 см',
     prices: {
       '1d': { name: '1 день', price: 2580, daily: 2580 },
       '3d': { name: '3 дня', price: 5528, daily: 1843 },
@@ -94,14 +108,18 @@ const MODELS_INFO = {
     }
   },
   'ortonica750': {
-    name: 'Ортоника 750',
+    name: 'Ортоника Pulse 750',
     photos: [
-      'https://i.postimg.cc/bNjt1Np5/1.png',
-      'https://i.postimg.cc/dtmT6PVn/2.png',
-      'https://i.postimg.cc/gkq6sF2s/2Snimok.png',
-      'https://i.postimg.cc/jdQJc0SZ/Snimok.png',
+      'ЗАМЕНИТЕ_НА_FILE_ID_1',
+      'ЗАМЕНИТЕ_НА_FILE_ID_2',
+      'ЗАМЕНИТЕ_НА_FILE_ID_3',
     ],
-    specs: '🚀 Скорость: 6 км/ч\n⚡ Запас хода: 25 км\n⚖️ Вес: 43 кг\n🏋️ Макс. нагрузка: 120 кг\n🟢 Флагман со всенаправленными колесами.',
+    specs: 
+      '🚀 Скорость: 6 км/ч | ⚡ Запас хода: до 25 км\n' +
+      '🤖 Авто-складывание: с пульта или через приложение\n' +
+      '⚙️ Двигатель: 2×200 W | 🔋 Литий-ионный 20 Ah\n' +
+      '🔄 Радиус разворота: 76 см (всенаправленные колеса 360°)\n' +
+      '⚖️ Вес: 43 кг | 🏋️ Нагрузка: 120 кг | 📏 Ширина сиденья: 43 см',
     prices: {
       '1d': { name: '1 день', price: 3069, daily: 3069 },
       '3d': { name: '3 дня', price: 6576, daily: 2192 },
@@ -161,7 +179,7 @@ bot.hears('🛵 Каталог колясок', async (ctx) => {
   );
 });
 
-// 🔥 БЕЗОПАСНЫЙ ПРОСМОТР МОДЕЛИ С HD ГАЛЕРЕЕЙ
+// 🔥 ОТПРАВКА КАРТОЧКИ С ФОТО И ОПИСАНИЕМ
 bot.callbackQuery(/^model_(.+)$/, async (ctx) => {
   const modelKey = ctx.match[1];
   const model = MODELS_INFO[modelKey];
@@ -171,15 +189,6 @@ bot.callbackQuery(/^model_(.+)$/, async (ctx) => {
   await notifyAdminLog(ctx, `Смотрит модель: ${model.name}`);
   await ctx.answerCallbackQuery().catch(() => {});
 
-  // 1. Отправка качественных фото из PostImages
-  if (model.photos && model.photos.length > 0) {
-    const mediaGroup = model.photos.map(url => ({ type: 'photo', media: url }));
-    await ctx.replyWithMediaGroup(mediaGroup).catch((err) => {
-      console.error('⚠️ Ошибка отправки HD фото (пропускаем):', err.message);
-    });
-  }
-
-  // 2. Описание и клавиатура выбора периода
   const p = model.prices;
   const keyboard = new InlineKeyboard()
     .text(`1 день — ${p['1d'].price.toLocaleString('ru-RU')} ₽`, `book_${modelKey}_1d`).row()
@@ -196,7 +205,26 @@ bot.callbackQuery(/^model_(.+)$/, async (ctx) => {
     `💰 <b>Выберите срок аренды:</b>\n` +
     `<i>Чем дольше срок — тем ниже стоимость в сутки!</i>`;
 
-  await ctx.reply(caption, { parse_mode: 'HTML', reply_markup: keyboard });
+  let sentSuccessfully = false;
+
+  // Безопасная попытка отправки карточки с обложкой
+  if (model.photos && model.photos.length > 0 && !model.photos[0].startsWith('ЗАМЕНИТЕ')) {
+    try {
+      await ctx.replyWithPhoto(model.photos[0], {
+        caption: caption,
+        parse_mode: 'HTML',
+        reply_markup: keyboard,
+      });
+      sentSuccessfully = true;
+    } catch (err) {
+      console.error('⚠️ Не удалось отправить карточку с фото:', err.message);
+    }
+  }
+
+  // Если фото нет или произошла ошибка — отправляем текстом
+  if (!sentSuccessfully) {
+    await ctx.reply(caption, { parse_mode: 'HTML', reply_markup: keyboard });
+  }
 });
 
 bot.callbackQuery('back_to_catalog', async (ctx) => {
@@ -307,7 +335,7 @@ bot.on('message', async (ctx, next) => {
       `🛵 <b>Модель:</b> ${booking.model || 'Не указана'}\n` +
       `⏱ <b>Период:</b> ${booking.period || 'Не указан'}\n` +
       `👤 <b>ФИО:</b> ${booking.fio || 'Не указано'}\n` +
-      `📞 <b>Телефон:</b> ${booking.phone || 'Не указан'}\n` +
+      `📞 <b>Телефон:</b> ${booking.phone || 'Не указано'}\n` +
       `📍 <b>Адрес и дата:</b> ${addressAndDate}\n\n` +
       `📞 <b>Менеджер свяжется с вами в ближайшее время для подтверждения.</b>`;
 
@@ -318,7 +346,7 @@ bot.on('message', async (ctx, next) => {
       `🛵 <b>Модель:</b> ${booking.model || 'Не указана'}\n` +
       `⏱ <b>Период:</b> ${booking.period || 'Не указан'}\n` +
       `👤 <b>ФИО:</b> ${booking.fio || 'Не указано'}\n` +
-      `📞 <b>Тел:</b> ${booking.phone || 'Не указан'}\n` +
+      `📞 <b>Тел:</b> ${booking.phone || 'Не указано'}\n` +
       `📍 <b>Адрес/Дата:</b> ${addressAndDate}\n\n` +
       `💬 <a href="tg://user?id=${ctx.from.id}">Написать клиенту</a>`;
 
