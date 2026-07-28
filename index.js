@@ -37,13 +37,16 @@ async function notifyAdminLog(ctx, actionText) {
 }
 
 // -------------------------------------------------------------
-// 📦 БАЗА ДАННЫХ МОДЕЛЕЙ И ЦЕН (КРАСИВЫЙ СТРУКТУРИРОВАННЫЙ ТЕКСТ)
+// 📦 БАЗА ДАННЫХ МОДЕЛЕЙ, ЦЕН И FILE_ID ФОТОГРАФИЙ
 // -------------------------------------------------------------
 const MODELS_INFO = {
   'ortonica620': {
     name: 'Ортоника Pulse 620',
     photos: [
-      // Вставьте сюда file_id, полученный от бота
+      'AgACAgIAAxkBAAIDRmporP2hTjvfnLvD6rAxHVuksNTGAAKGGGsbRhdJSz-_U9sW8vehAQADAgADeAADPQQ',
+      'AgACAgIAAxkBAAIDR2porP13XI-jsZ_43CQ2uxYJxSTXAAKHGGsbRhdJSwXqCAWmF0h8AQADAgADeAADPQQ',
+      'AgACAgIAAxkBAAIDSGporP1F2ajD7TAfq9gZODAaSiVvAAKIGGsbRhdJS6yqQ-bYkB3NAQADAgADeQADPQQ',
+      'AgACAgIAAxkBAAIDSWporP3yqTe8z8GbtVBpllbtPC75AAKJGGsbRhdJS68aPQKZGzNpAQADAgADeQADPQQ',
     ],
     specs: 
       '🚀 <b>Скорость:</b> 6 км/ч\n' +
@@ -66,7 +69,9 @@ const MODELS_INFO = {
   'ortonica650': {
     name: 'Ортоника Pulse 650',
     photos: [
-      // Вставьте сюда file_id, полученный от бота
+      'AgACAgIAAxkBAAIDMGporKMGWQABF3HRXyDeZLlh-TkobQACHBdrGzKZSUvnIDxoWxIjUAEAAwIAA3kAAz0E',
+      'AgACAgIAAxkBAAIDMWporKOTnILyLftDdLuY0cP5-i-PAAIdF2sbMplJS7ALqMXwjdl0AQADAgADeQADPQQ',
+      'AgACAgIAAxkBAAIDMmporKMSeN9HGngI1aXW-pfh5EOXAAIeF2sbMplJS4BX-Ygf_6RXAQADAgADeQADPQQ',
     ],
     specs: 
       '🚀 <b>Скорость:</b> 6 км/ч\n' +
@@ -89,7 +94,10 @@ const MODELS_INFO = {
   'ortonica690': {
     name: 'Ортоника Pulse 690',
     photos: [
-      // Вставьте сюда file_id, полученный от бота
+      'AgACAgIAAxkBAAIDNmporMeauN22G8MJctoWqletiWDdAAJ9GGsbRhdJSxH6XErmFqLWAQADAgADeAADPQQ',
+      'AgACAgIAAxkBAAIDN2porMfMbETiayTN-7yy8DZfDxnAAAJ-GGsbRhdJS6h412M3A46oAQADAgADeAADPQQ',
+      'AgACAgIAAxkBAAIDOGporMdXgp0Q_EdG37CzBXFdznbeAAJ_GGsbRhdJS7iGPn6X4B_kAQADAgADeQADPQQ',
+      'AgACAgIAAxkBAAIDOWporMe-ovWKTaS_ivVe8cQZpk4vAAKAGGsbRhdJS5Ia9ErS4uL1AQADAgADeAADPQQ',
     ],
     specs: 
       '🚀 <b>Скорость:</b> до 8 км/ч 🔥\n' +
@@ -111,7 +119,10 @@ const MODELS_INFO = {
   'ortonica750': {
     name: 'Ортоника Pulse 750',
     photos: [
-      // Вставьте сюда file_id, полученный от бота
+      'AgACAgIAAxkBAAIDPmporOGXMwmT4D83_jOIHiuv9XHvAAKCGGsbRhdJSyVEdha2j0a1AQADAgADeAADPQQ',
+      'AgACAgIAAxkBAAIDP2porOFbwP_sReVvMg-EVheo6ZAVAAKDGGsbRhdJS-txm9vuEkkHAQADAgADeAADPQQ',
+      'AgACAgIAAxkBAAIDQGporOHC9bmi8lbrpkA2scloX2RvAAKEGGsbRhdJS6b_1hYnIk0tAQADAgADeQADPQQ',
+      'AgACAgIAAxkBAAIDQWporOGXn7Kw3Fexf2mG6NfJJPvdAAKFGGsbRhdJS_b9k1JOrL_PAQADAgADeQADPQQ',
     ],
     specs: 
       '🚀 <b>Скорость:</b> 6 км/ч\n' +
@@ -180,7 +191,7 @@ bot.hears('🛵 Каталог колясок', async (ctx) => {
   );
 });
 
-// 🔥 ОТПРАВКА КАРТОЧКИ С ПОДПИСЬЮ И ЛЕГКИМ ВОСПРИЯТИЕМ ТЕКСТА
+// 🔥 ОТПРАВКА КАРТОЧКИ С ФОТО И УДОБНЫМ СТРУКТУРИРОВАННЫМ ТЕКСТОМ
 bot.callbackQuery(/^model_(.+)$/, async (ctx) => {
   const modelKey = ctx.match[1];
   const model = MODELS_INFO[modelKey];
@@ -200,7 +211,6 @@ bot.callbackQuery(/^model_(.+)$/, async (ctx) => {
     .text(`1 месяц — ${p['30d'].price.toLocaleString('ru-RU')} ₽ 🔥 (${p['30d'].daily} ₽/сут)`, `book_${modelKey}_30d`).row()
     .text('⬅️ Назад в каталог', 'back_to_catalog');
 
-  // Каждая секция наглядна и структурирована с новой строки
   const caption = 
     `♿ <b>Электроколяска ${model.name}</b>\n\n` +
     `📋 <b>Характеристики:</b>\n` +
@@ -210,8 +220,8 @@ bot.callbackQuery(/^model_(.+)$/, async (ctx) => {
 
   let sentSuccessfully = false;
 
-  // Если есть фото — отправляем карточку фото-сообщением
-  if (model.photos && model.photos.length > 0 && !model.photos[0].startsWith('ЗАМЕНИТЕ')) {
+  // Безопасная отправка обложки с кнопками
+  if (model.photos && model.photos.length > 0) {
     try {
       await ctx.replyWithPhoto(model.photos[0], {
         caption: caption,
@@ -220,11 +230,11 @@ bot.callbackQuery(/^model_(.+)$/, async (ctx) => {
       });
       sentSuccessfully = true;
     } catch (err) {
-      console.error('⚠️ Не удалось отправить карточку с фото:', err.message);
+      console.error('⚠️ Не удалось отправить фото обложки:', err.message);
     }
   }
 
-  // Если фото еще не загружено или упало — отправляем понятный текстовый вариант
+  // Если фото не отправилось — выводим текстовую карточку
   if (!sentSuccessfully) {
     await ctx.reply(caption, { parse_mode: 'HTML', reply_markup: keyboard });
   }
@@ -416,7 +426,7 @@ bot.on('message:photo', async (ctx) => {
   await ctx.reply(
     `📸 <b>Ваш file_id для кода:</b>\n\n` +
     `<code>${photo.file_id}</code>\n\n` +
-    `<i>Нажмите на код выше, чтобы скопировать его, и вставьте в photos:[...] в index.js</i>`,
+    `<i>Нажмите на код выше, чтобы скопировать его</i>`,
     { parse_mode: 'HTML' }
   );
 });
