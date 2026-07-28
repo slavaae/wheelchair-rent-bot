@@ -1,5 +1,4 @@
 const { Bot, session, InlineKeyboard, Keyboard } = require('grammy');
-const { conversations, createConversation } = require('@grammyjs/conversations');
 const { saveOrder } = require('./googleSheets');
 const http = require('http');
 require('dotenv').config();
@@ -7,18 +6,13 @@ require('dotenv').config();
 const bot = new Bot(process.env.BOT_TOKEN);
 
 // -------------------------------------------------------------
-// 1. СЕССИИ (Хранение в памяти)
+// 1. СЕССИИ (Простая надёжная схема)
 // -------------------------------------------------------------
 bot.use(
   session({
-    initial: () => ({ bookingData: {}, quiz: {} }),
+    initial: () => ({ step: 'idle', bookingData: {}, quiz: {} }),
   })
 );
-
-// -------------------------------------------------------------
-// 2. ПЛАГИН РАЗГОВОРОВ
-// -------------------------------------------------------------
-bot.use(conversations());
 
 // -------------------------------------------------------------
 // 🛠️ ЛОГИРОВАНИЕ ДЕЙСТВИЙ АДМИНУ
@@ -41,90 +35,6 @@ async function notifyAdminLog(ctx, actionText) {
     console.error('Ошибка логирования действий админу:', e.message);
   }
 }
-
-// -------------------------------------------------------------
-// 📋 СЦЕНАРИЙ ОФОРМЛЕНИЯ ЗАКАЗА (ПРЯМОЙ И ЛИНЕЙНЫЙ)
-// -------------------------------------------------------------
-async function bookingConversation(conversation, ctx) {
-  // Получаем выбранную модель из сессии
-  const booking = await conversation.external((ctx) => ctx.session.bookingData || {});
-
-  // 1. ФИО
-  await ctx.reply('Введите, пожалуйста, ваше <b>ФИО полностью</b>:', { parse_mode: 'HTML' });
-  const { message: { text: fio } } = await conversation.waitFor('message:text');
-
-  // 2. Телефон
-  const phoneKeyboard = new Keyboard()
-    .requestContact('📱 Поделиться номером телефона')
-    .resized()
-    .oneTime();
-
-  await ctx.reply('Укажите ваш контактный номер телефона (или нажмите кнопку ниже):', { 
-    reply_markup: phoneKeyboard 
-  });
-
-  const phoneCtx = await conversation.waitFor(['message:contact', 'message:text']);
-  const phone = phoneCtx.message.contact 
-    ? phoneCtx.message.contact.phone_number 
-    : phoneCtx.message.text;
-
-  // 3. Адрес и Дата
-  const mainKeyboard = getMainMenuKeyboard();
-  await ctx.reply('Укажите <b>город, адрес и желаемую дату/время доставки</b>:', { 
-    parse_mode: 'HTML',
-    reply_markup: { remove_keyboard: true }
-  });
-  
-  const addressCtx = await conversation.waitFor('message:text');
-  const addressAndDate = addressCtx.message.text;
-
-  // 4. Сохранение в Google Таблицу
-  try {
-    await saveOrder({
-      userId: ctx.from.id,
-      fio,
-      phone,
-      addressAndDate,
-      model: booking.model || 'Не указана',
-      period: booking.period || 'Не указан',
-    });
-  } catch (e) {
-    console.error('Ошибка записи в Google Таблицу:', e.message);
-  }
-
-  // 5. Уведомление клиенту
-  const finishText = 
-    `🎉 <b>Ваша заявка успешно принята!</b>\n\n` +
-    `🛵 <b>Модель:</b> ${booking.model}\n` +
-    `⏱ <b>Период:</b> ${booking.period}\n` +
-    `👤 <b>ФИО:</b> ${fio}\n` +
-    `📞 <b>Телефон:</b> ${phone}\n` +
-    `📍 <b>Адрес и дата:</b> ${addressAndDate}\n\n` +
-    `📞 <b>Менеджер свяжется с вами в ближайшее время для подтверждения.</b>`;
-
-  await ctx.reply(finishText, { parse_mode: 'HTML', reply_markup: mainKeyboard });
-
-  // 6. Уведомление админу
-  const adminMsg = 
-    `📥 <b>НОВАЯ ЗАЯВКА НА АРЕНДУ!</b>\n\n` +
-    `🛵 <b>Модель:</b> ${booking.model}\n` +
-    `⏱ <b>Период:</b> ${booking.period}\n` +
-    `👤 <b>ФИО:</b> ${fio}\n` +
-    `📞 <b>Тел:</b> ${phone}\n` +
-    `📍 <b>Адрес/Дата:</b> ${addressAndDate}\n\n` +
-    `💬 <a href="tg://user?id=${ctx.from.id}">Написать клиенту</a>`;
-
-  try {
-    if (process.env.ADMIN_CHAT_ID) {
-      await ctx.api.sendMessage(process.env.ADMIN_CHAT_ID, adminMsg, { parse_mode: 'HTML' });
-    }
-  } catch (adminErr) {
-    console.error('Ошибка отправки админу:', adminErr.message);
-  }
-}
-
-// Регистрируем диалог
-bot.use(createConversation(bookingConversation));
 
 // -------------------------------------------------------------
 // 📦 БАЗА ДАННЫХ МОДЕЛЕЙ И ЦЕН
@@ -194,7 +104,7 @@ const MODELS_INFO = {
 };
 
 // -------------------------------------------------------------
-// 🪟 КНОПКИ И ОБРАБОТЧИКИ МЕНЮ
+// 🪟 КНОПКИ МЕНЮ
 // -------------------------------------------------------------
 function getMainMenuKeyboard() {
   return new Keyboard()
@@ -212,7 +122,11 @@ function getCatalogKeyboard() {
     .text('Ортоника 750 (от 833 ₽/сут) 🔥', 'model_ortonica750').row();
 }
 
+// -------------------------------------------------------------
+// 📍 ОСНОВНЫЕ КОМАНДЫ
+// -------------------------------------------------------------
 bot.command(['start', 'menu'], async (ctx) => {
+  ctx.session.step = 'idle';
   await notifyAdminLog(ctx, 'Запустил бота (/start)');
   await ctx.reply(
     `Здравствуйте, ${ctx.from.first_name}!\n\n` +
@@ -222,11 +136,13 @@ bot.command(['start', 'menu'], async (ctx) => {
 });
 
 bot.hears('🏠 Главное меню', async (ctx) => {
+  ctx.session.step = 'idle';
   await notifyAdminLog(ctx, 'Нажал «Главное меню»');
   await ctx.reply('Вы вернулись в главное меню:', { reply_markup: getMainMenuKeyboard() });
 });
 
 bot.hears('🛵 Каталог колясок', async (ctx) => {
+  ctx.session.step = 'idle';
   await notifyAdminLog(ctx, 'Открыл «Каталог колясок»');
   await ctx.reply(
     '🛵 <b>Каталог электроколясок</b>\n\n' +
@@ -274,7 +190,7 @@ bot.callbackQuery('back_to_catalog', async (ctx) => {
 });
 
 // -------------------------------------------------------------
-// 🔥 ВЫБОР ПЕРИОДА (КЛЮЧЕВАЯ ИСПРАВЛЕННАЯ ЧАСТЬ)
+// 🔥 ВЫБОР ПЕРИОДА АРЕНДЫ (МГНОВЕННЫЙ ОТВЕТ)
 // -------------------------------------------------------------
 bot.callbackQuery(/^book_([^_]+)_(.+)$/, async (ctx) => {
   const modelKey = ctx.match[1];
@@ -287,19 +203,15 @@ bot.callbackQuery(/^book_([^_]+)_(.+)$/, async (ctx) => {
 
   const selectedPeriod = model.prices[periodKey];
 
-  // Записываем данные в сессию
-  if (!ctx.session) ctx.session = {};
   ctx.session.bookingData = {
     model: model.name,
     period: `${selectedPeriod.name} (${selectedPeriod.price.toLocaleString('ru-RU')} ₽)`,
   };
 
-  // Гасим анимацию кнопки
   await ctx.answerCallbackQuery();
   await notifyAdminLog(ctx, `Выбрал тариф: ${model.name} — ${selectedPeriod.name}`);
 
-  // Показываем кнопку Согласия ФЗ-152 ОТДЕЛЬНО
-  const fzKeyboard = new InlineKeyboard().text('✅ Согласен с ФЗ-152', 'start_booking_now');
+  const fzKeyboard = new InlineKeyboard().text('✅ Согласен с ФЗ-152', 'accept_fz152_go');
 
   await ctx.reply(
     '🔒 <b>Обработка персональных данных (ФЗ-152)</b>\n\n' +
@@ -310,15 +222,110 @@ bot.callbackQuery(/^book_([^_]+)_(.+)$/, async (ctx) => {
   );
 });
 
-// Клик по кнопке «Согласен с ФЗ-152» запускает ввод данных!
-bot.callbackQuery('start_booking_now', async (ctx) => {
+// Клик «Согласен с ФЗ-152» ➔ Просим ФИО
+bot.callbackQuery('accept_fz152_go', async (ctx) => {
   await ctx.answerCallbackQuery();
-  // Входим в разговор строго после нажатия кнопки
-  await ctx.conversation.enter('bookingConversation');
+  ctx.session.step = 'awaiting_fio';
+  await ctx.reply('Отлично! Введите, пожалуйста, ваше <b>ФИО полностью</b>:', { parse_mode: 'HTML' });
 });
 
 // -------------------------------------------------------------
-// ИНФОРМАЦИОННЫЕ РАЗДЕЛЫ
+// 📝 ПОШАГОВЫЙ СБОР ДАННЫХ (БЕЗ ПЛАГИНА CONVERSATIONS)
+// -------------------------------------------------------------
+bot.on('message', async (ctx, next) => {
+  const step = ctx.session?.step;
+
+  // Если клиент вводит ФИО
+  if (step === 'awaiting_fio') {
+    if (!ctx.message.text) return ctx.reply('Пожалуйста, введите ваше ФИО текстом.');
+    
+    ctx.session.bookingData.fio = ctx.message.text;
+    ctx.session.step = 'awaiting_phone';
+
+    const phoneKeyboard = new Keyboard()
+      .requestContact('📱 Поделиться номером телефона')
+      .resized()
+      .oneTime();
+
+    return ctx.reply('Укажите ваш контактный номер телефона (или нажмите кнопку ниже):', { 
+      reply_markup: phoneKeyboard 
+    });
+  }
+
+  // Если клиент вводит Телефон (текст или кнопка «Поделиться контактом»)
+  if (step === 'awaiting_phone') {
+    const phone = ctx.message.contact ? ctx.message.contact.phone_number : ctx.message.text;
+    if (!phone) return ctx.reply('Пожалуйста, отправьте номер телефона.');
+
+    ctx.session.bookingData.phone = phone;
+    ctx.session.step = 'awaiting_address';
+
+    return ctx.reply('Укажите <b>город, адрес и желаемую дату/время доставки</b>:', { 
+      parse_mode: 'HTML',
+      reply_markup: { remove_keyboard: true }
+    });
+  }
+
+  // Если клиент вводит Адрес и Дату (ФИНАЛ)
+  if (step === 'awaiting_address') {
+    if (!ctx.message.text) return ctx.reply('Пожалуйста, укажите адрес и дату текстом.');
+
+    const addressAndDate = ctx.message.text;
+    const booking = ctx.session.bookingData;
+    ctx.session.step = 'idle'; // Сбрасываем шаг
+
+    // 1. Запись в Google Таблицу
+    try {
+      await saveOrder({
+        userId: ctx.from.id,
+        fio: booking.fio,
+        phone: booking.phone,
+        addressAndDate,
+        model: booking.model || 'Не указана',
+        period: booking.period || 'Не указан',
+      });
+    } catch (e) {
+      console.error('Ошибка записи в Google Таблицу:', e.message);
+    }
+
+    // 2. Ответ клиенту
+    const finishText = 
+      `🎉 <b>Ваша заявка успешно принята!</b>\n\n` +
+      `🛵 <b>Модель:</b> ${booking.model}\n` +
+      `⏱ <b>Период:</b> ${booking.period}\n` +
+      `👤 <b>ФИО:</b> ${booking.fio}\n` +
+      `📞 <b>Телефон:</b> ${booking.phone}\n` +
+      `📍 <b>Адрес и дата:</b> ${addressAndDate}\n\n` +
+      `📞 <b>Менеджер свяжется с вами в ближайшее время для подтверждения.</b>`;
+
+    await ctx.reply(finishText, { parse_mode: 'HTML', reply_markup: getMainMenuKeyboard() });
+
+    // 3. Уведомление админу
+    const adminMsg = 
+      `📥 <b>НОВАЯ ЗАЯВКА НА АРЕНДУ!</b>\n\n` +
+      `🛵 <b>Модель:</b> ${booking.model}\n` +
+      `⏱ <b>Период:</b> ${booking.period}\n` +
+      `👤 <b>ФИО:</b> ${booking.fio}\n` +
+      `📞 <b>Тел:</b> ${booking.phone}\n` +
+      `📍 <b>Адрес/Дата:</b> ${addressAndDate}\n\n` +
+      `💬 <a href="tg://user?id=${ctx.from.id}">Написать клиенту</a>`;
+
+    try {
+      if (process.env.ADMIN_CHAT_ID) {
+        await ctx.api.sendMessage(process.env.ADMIN_CHAT_ID, adminMsg, { parse_mode: 'HTML' });
+      }
+    } catch (adminErr) {
+      console.error('Ошибка отправки админу:', adminErr.message);
+    }
+
+    return;
+  }
+
+  return next();
+});
+
+// -------------------------------------------------------------
+// ИНФОРМАЦИОННЫЕ РАЗДЕЛЫ И КОНТАКТЫ
 // -------------------------------------------------------------
 bot.hears('ℹ️ Условия аренды', async (ctx) => {
   await notifyAdminLog(ctx, 'Открыл «Условия аренды»');
