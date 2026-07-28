@@ -37,16 +37,15 @@ async function notifyAdminLog(ctx, actionText) {
 }
 
 // -------------------------------------------------------------
-// 📦 БАЗА ДАННЫХ МОДЕЛЕЙ И ЦЕН (С ВОЗВРАЩЕННЫМИ ФОТО)
+// 📦 БАЗА ДАННЫХ МОДЕЛЕЙ И ЦЕН (ОБНОВЛЕННЫЕ ФОТО)
 // -------------------------------------------------------------
 const MODELS_INFO = {
   'ortonica620': {
     name: 'Ортоника 620',
     photos: [
       'AgACAgIAAxkBAAMYamfVDXqYTHvBH6p6GFI-h_ahSwEAAjAjaxvS5jlL4lgiueYZa0kBAAMCAAN4AAM9BA',
-      'AgACAgIAAxkBAAMZamfVDYjblPSiCzhGuafvj_n-TtgAAjIjaxvS5jlLmYldsmw1hZ4BAAMCAAN4AAM9BA',
       'AgACAgIAAxkBAAMaamfVDXOjhGMWrRjVy-jCwYdcZmYAAjEjaxvS5jlLz-X3Y-jJYn4BAAMCAAN4AAM9BA',
-      'AgACAgIAAxkBAAMbamfVDQ7fyrMzuw1T0DUoWBal4ecAAjMjaxvS5jlLWNYtVMUoeWoBAAMCAAN5AAM9BA',
+      'AgACAgIAAxkBAAMdamfVDcIluCeUO_5XSYD9V8aO4SEAAjUjaxvS5jlLObBYO01WkYQBAAMCAAN5AAM9BA',
     ],
     specs: '🚀 Скорость: 6 км/ч\n⚡ Запас хода: 20 км\n⚖️ Вес: 26 кг\n🏋️ Макс. нагрузка: 120 кг\n🟢 Доступная стоимость. Прочная конструкция, которую сложно повредить.',
     prices: {
@@ -61,9 +60,9 @@ const MODELS_INFO = {
   'ortonica650': {
     name: 'Ортоника 650',
     photos: [
-      'AgACAgIAAxkBAAN8amfaSC6refFdfAMxEUjXH1uYuzIAAkQjaxvS5jlLRbTOk14z6doBAAMCAAN5AAM9BA',
-      'AgACAgIAAxkBAAN9amfaSDhJJD6vHGpkMenOB94wdIIAAkUjaxvS5jlLlP-fPJA6JHABAAMCAAN4AAM9BA',
-      'AgACAgIAAxkBAAN-amfaSMXWckW-9JDEtzNrBvwrWcwAAkYjaxvS5jlLIgwors7eKCoBAAMCAAN5AAM9BA',
+      'AgACAgIAAxkBAAOAamfaSE8CWdw5UlahL7MIiy4I1AMAAkgjaxvS5jlLrdSCLqJ6NgwBAAMCAAN5AAM9BA',
+      'AgACAgIAAxkBAAOBamfaSIC2Bhg-A_Ok3TcNlkv4iMAAAkkjaxvS5jlLDcv6GKaPiWsBAAMCAAN5AAM9BA',
+      'AgACAgIAAxkBAAOCamfaSO6tfk0QftMj3CZxHOlOD5EAAkojaxvS5jlLSUgBHr18BoQBAAMCAAN5AAM9BA',
     ],
     specs: '🚀 Скорость: 6 км/ч\n⚡ Запас хода: 20 км\n⚖️ Вес: 23 кг\n🏋️ Макс. нагрузка: 130 кг\n🟢 Самая компактная модель. Идеальна для квартиры.',
     prices: {
@@ -80,7 +79,7 @@ const MODELS_INFO = {
     photos: [
       'AgACAgIAAxkBAANXamfaAAHiqFH1yBQ6UR0_LC9E62F_AAI2I2sb0uY5SzffZnbqGTx5AQADAgADeQADPQQ',
       'AgACAgIAAxkBAANYamfaAAFSA74kqbD8p5Z-USgiDf2BAAI3I2sb0uY5SzP3adhBiqgfAQADAgADeAADPQQ',
-      'AgACAgIAAxkBAANZamfaAAHLL1IS6tEIawvFrrxQop8DAAI4I2sb0uY5S3FyWmpfdi1PAQADAgADeAADPQQ',
+      'AgACAgIAAxkBAANdamfaAAHqwbhnQfwf2uK3g0HvhFfxAAI8I2sb0uY5S95ph7xtUf2lAQADAgADeAADPQQ',
     ],
     specs: '🚀 Скорость: 8 км/ч\n⚡ Запас хода: 20 км\n⚖️ Вес: 25 кг\n🏋️ Макс. нагрузка: 150 кг\n🟢 Стильное кресло с приятной эргономикой.',
     prices: {
@@ -98,6 +97,10 @@ const MODELS_INFO = {
       'AgACAgIAAxkBAANtamfaOfBzPz1bcengmeqXScRqQ2gAAj0jaxvS5jlL-ks51_fZah4BAAMCAAN4AAM9BA',
       'AgACAgIAAxkBAANuamfaOX9vYbFLpINL6z_KfqEmlGQAAj4jaxvS5jlLgPYYSha1t6UBAAMCAAN4AAM9BA',
       'AgACAgIAAxkBAANvamfaOfVcCzH-OmjqHo-RmJb4SxsAAj8jaxvS5jlL9Sl8vrEvGggBAAMCAAN5AAM9BA',
+      'AgACAgIAAxkBAANwamfaOedxoyzZ7a0W5eY9Kj7OKOwAAkAjaxvS5jlL8RV5NmpjqYUBAAMCAAN4AAM9BA',
+      'AgACAgIAAxkBAANxamfaOfKTmCLMVj64XQKWp5SSidQAAkEjaxvS5jlLeCRnTO_udHoBAAMCAAN4AAM9BA',
+      'AgACAgIAAxkBAANyamfaOe2O0DB1KzHR-Nhk93_8nTcAAkIjaxvS5jlLmAfUBuGTQHMBAAMCAAN4AAM9BA',
+      'AgACAgIAAxkBAANzamfaOQ9tKa53k6qsftRnq0U4PB0AAkMjaxvS5jlLOaVMdHsoGpQBAAMCAAN4AAM9BA',
     ],
     specs: '🚀 Скорость: 6 км/ч\n⚡ Запас хода: 25 км\n⚖️ Вес: 43 кг\n🏋️ Макс. нагрузка: 120 кг\n🟢 Флагман со всенаправленными колесами.',
     prices: {
@@ -159,7 +162,7 @@ bot.hears('🛵 Каталог колясок', async (ctx) => {
   );
 });
 
-// 🔥 ПРОСМОТР МОДЕЛИ (ОТПРАВКА КАРТОЧКИ С ФОТОГРАФИЯМИ)
+// 🔥 ПРОСМОТР МОДЕЛИ
 bot.callbackQuery(/^model_(.+)$/, async (ctx) => {
   const modelKey = ctx.match[1];
   const model = MODELS_INFO[modelKey];
@@ -169,15 +172,13 @@ bot.callbackQuery(/^model_(.+)$/, async (ctx) => {
   await notifyAdminLog(ctx, `Смотрит модель: ${model.name}`);
   await ctx.answerCallbackQuery().catch(() => {});
 
-  // 1. Безопасная отправка фотографий (если есть)
   if (model.photos && model.photos.length > 0) {
     const mediaGroup = model.photos.map(fileId => ({ type: 'photo', media: fileId }));
     await ctx.replyWithMediaGroup(mediaGroup).catch((err) => {
-      console.error('⚠️ Ошибка отправки фото галереи (пропускаем):', err.message);
+      console.error('⚠️ Ошибка отправки галереи:', err.message);
     });
   }
 
-  // 2. Клавиатура с ценами
   const p = model.prices;
   const keyboard = new InlineKeyboard()
     .text(`1 день — ${p['1d'].price.toLocaleString('ru-RU')} ₽`, `book_${modelKey}_1d`).row()
@@ -287,7 +288,6 @@ bot.on('message', async (ctx, next) => {
     const booking = ctx.session.bookingData || {};
     ctx.session.step = 'idle';
 
-    // Запись в Google Таблицу (с защитой)
     try {
       await saveOrder({
         userId: ctx.from.id,
@@ -298,7 +298,7 @@ bot.on('message', async (ctx, next) => {
         period: booking.period || 'Не указан',
       });
     } catch (e) {
-      console.error('⚠️ Ошибка записи в Таблицу (клиенту всё равно ответили):', e.message);
+      console.error('⚠️ Ошибка записи в Таблицу:', e.message);
     }
 
     const finishText = 
