@@ -37,16 +37,16 @@ async function notifyAdminLog(ctx, actionText) {
 }
 
 // -------------------------------------------------------------
-// 📦 БАЗА ДАННЫХ МОДЕЛЕЙ И ЦЕН (ПРЯМЫЕ URL КАРТИНОК ИЗ IMGBB)
+// 📦 БАЗА ДАННЫХ МОДЕЛЕЙ И ЦЕН (HD ФОТО С POSTIMAGES)
 // -------------------------------------------------------------
 const MODELS_INFO = {
   'ortonica620': {
     name: 'Ортоника 620',
     photos: [
-      'https://i.ibb.co/sdGvpTMv/image.jpg',
-      'https://i.ibb.co/4CsqHhs/image.jpg',
-      'https://i.ibb.co/xc0wk4w/image.jpg',
-      'https://i.ibb.co/v4zRDTQ0/image.jpg',
+      'https://i.postimg.cc/jS2d7GwQ/1.png',
+      'https://i.postimg.cc/zGvXg9bp/3.png',
+      'https://i.postimg.cc/htvPdHz3/4.png',
+      'https://i.postimg.cc/Dw0yXtJp/6.png',
     ],
     specs: '🚀 Скорость: 6 км/ч\n⚡ Запас хода: 20 км\n⚖️ Вес: 26 кг\n🏋️ Макс. нагрузка: 120 кг\n🟢 Доступная стоимость. Прочная конструкция, которую сложно повредить.',
     prices: {
@@ -61,9 +61,9 @@ const MODELS_INFO = {
   'ortonica650': {
     name: 'Ортоника 650',
     photos: [
-      'https://i.ibb.co/rRqP7TWd/image.jpg',
-      'https://i.ibb.co/TBtx3LJK/image.jpg',
-      'https://i.ibb.co/0VZ9fSMP/image.jpg',
+      'https://i.postimg.cc/Bb3nPbH8/6628939200.jpg',
+      'https://i.postimg.cc/Hnmk8nXQ/orig.jpg',
+      'https://i.postimg.cc/902Qw0Zy/Snimok.png',
     ],
     specs: '🚀 Скорость: 6 км/ч\n⚡ Запас хода: 20 км\n⚖️ Вес: 23 кг\n🏋️ Макс. нагрузка: 130 кг\n🟢 Самая компактная модель. Идеальна для квартиры.',
     prices: {
@@ -78,10 +78,10 @@ const MODELS_INFO = {
   'ortonica690': {
     name: 'Ортоника 690',
     photos: [
-      'https://i.ibb.co/KpPMYtrC/image.jpg',
-      'https://i.ibb.co/qYngTTgw/image.jpg',
-      'https://i.ibb.co/1GWDCWD0/image.jpg',
-      'https://i.ibb.co/99XzKNcV/image.jpg',
+      'https://i.postimg.cc/6QT2B8L1/1.png',
+      'https://i.postimg.cc/zf3bqyS6/10.png',
+      'https://i.postimg.cc/FK1dhYgM/2.png',
+      'https://i.postimg.cc/1z4ny8cT/4.png',
     ],
     specs: '🚀 Скорость: 8 км/ч\n⚡ Запас хода: 20 км\n⚖️ Вес: 25 кг\n🏋️ Макс. нагрузка: 150 кг\n🟢 Стильное кресло с приятной эргономикой.',
     prices: {
@@ -96,10 +96,10 @@ const MODELS_INFO = {
   'ortonica750': {
     name: 'Ортоника 750',
     photos: [
-      'https://i.ibb.co/j94hPSrd/image.jpg',
-      'https://i.ibb.co/3GS16Mr/image.jpg',
-      'https://i.ibb.co/vxYb2WVV/image.jpg',
-      'https://i.ibb.co/7tcd5yNc/image.jpg',
+      'https://i.postimg.cc/bNjt1Np5/1.png',
+      'https://i.postimg.cc/dtmT6PVn/2.png',
+      'https://i.postimg.cc/gkq6sF2s/2Snimok.png',
+      'https://i.postimg.cc/jdQJc0SZ/Snimok.png',
     ],
     specs: '🚀 Скорость: 6 км/ч\n⚡ Запас хода: 25 км\n⚖️ Вес: 43 кг\n🏋️ Макс. нагрузка: 120 кг\n🟢 Флагман со всенаправленными колесами.',
     prices: {
@@ -161,7 +161,7 @@ bot.hears('🛵 Каталог колясок', async (ctx) => {
   );
 });
 
-// 🔥 БЕЗОПАСНЫЙ ПРОСМОТР МОДЕЛИ С ГАЛЕРЕЕЙ ССЫЛОК
+// 🔥 БЕЗОПАСНЫЙ ПРОСМОТР МОДЕЛИ С HD ГАЛЕРЕЕЙ
 bot.callbackQuery(/^model_(.+)$/, async (ctx) => {
   const modelKey = ctx.match[1];
   const model = MODELS_INFO[modelKey];
@@ -171,15 +171,15 @@ bot.callbackQuery(/^model_(.+)$/, async (ctx) => {
   await notifyAdminLog(ctx, `Смотрит модель: ${model.name}`);
   await ctx.answerCallbackQuery().catch(() => {});
 
-  // 1. Отправка фотогалереи по прямым URL
+  // 1. Отправка качественных фото из PostImages
   if (model.photos && model.photos.length > 0) {
     const mediaGroup = model.photos.map(url => ({ type: 'photo', media: url }));
     await ctx.replyWithMediaGroup(mediaGroup).catch((err) => {
-      console.error('⚠️ Ошибка отправки фото (пропускаем):', err.message);
+      console.error('⚠️ Ошибка отправки HD фото (пропускаем):', err.message);
     });
   }
 
-  // 2. Описание и кнопки тарифов
+  // 2. Описание и клавиатура выбора периода
   const p = model.prices;
   const keyboard = new InlineKeyboard()
     .text(`1 день — ${p['1d'].price.toLocaleString('ru-RU')} ₽`, `book_${modelKey}_1d`).row()
