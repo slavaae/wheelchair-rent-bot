@@ -6,16 +6,23 @@ require('dotenv').config();
 
 const bot = new Bot(process.env.BOT_TOKEN);
 
-// 1. СЕССИИ И РАЗГОВОРЫ
+// -------------------------------------------------------------
+// 1. СЕССИИ (Хранение в памяти)
+// -------------------------------------------------------------
 bot.use(
   session({
     initial: () => ({ bookingData: {}, quiz: {} }),
   })
 );
 
+// -------------------------------------------------------------
+// 2. ПЛАГИН РАЗГОВОРОВ
+// -------------------------------------------------------------
 bot.use(conversations());
 
-// ВСПОМОГАТЕЛЬНАЯ ФУНКЦИЯ ЛОГИРОВАНИЯ
+// -------------------------------------------------------------
+// 🛠️ ЛОГИРОВАНИЕ ДЕЙСТВИЙ АДМИНУ
+// -------------------------------------------------------------
 async function notifyAdminLog(ctx, actionText) {
   try {
     if (!process.env.ADMIN_CHAT_ID) return;
@@ -35,115 +42,18 @@ async function notifyAdminLog(ctx, actionText) {
   }
 }
 
-// МОДЕЛИ И ХАРАКТЕРИСТИКИ
-const MODELS_INFO = {
-  'ortonica620': {
-    name: 'Ортоника 620',
-    photos: [
-      'AgACAgIAAxkBAAMYamfVDXqYTHvBH6p6GFI-h_ahSwEAAjAjaxvS5jlL4lgiueYZa0kBAAMCAAN4AAM9BA',
-      'AgACAgIAAxkBAAMZamfVDYjblPSiCzhGuafvj_n-TtgAAjIjaxvS5jlLmYldsmw1hZ4BAAMCAAN4AAM9BA',
-      'AgACAgIAAxkBAAMaamfVDXOjhGMWrRjVy-jCwYdcZmYAAjEjaxvS5jlLz-X3Y-jJYn4BAAMCAAN4AAM9BA',
-      'AgACAgIAAxkBAAMbamfVDQ7fyrMzuw1T0DUoWBal4ecAAjMjaxvS5jlLWNYtVMUoeWoBAAMCAAN5AAM9BA',
-      'AgACAgIAAxkBAAMcamfVDSD1Ca3S9AvoCs6XUDb3jNAAAjQjaxvS5jlL9gv1HSdurkABAAMCAAN5AAM9BA',
-      'AgACAgIAAxkBAAMdamfVDcIluCeUO_5XSYD9V8aO4SEAAjUjaxvS5jlLObBYO01WkYQBAAMCAAN5AAM9BA',
-    ],
-    specs: '🚀 Скорость: 6 км/ч\n⚡ Запас хода: 20 км\n⚖️ Вес: 26 кг\n🏋️ Макс. нагрузка: 120 кг\n🟢 Доступная стоимость. Прочная конструкция, которую сложно повредить.',
-    prices: {
-      '1d': { name: '1 день', price: 2088, daily: 2088 },
-      '3d': { name: '3 дня', price: 4475, daily: 1492 },
-      '7d': { name: '1 неделя (7 дней)', price: 7735, daily: 1105 },
-      '14d': { name: '2 недели (14 дней)', price: 11900, daily: 850 },
-      '21d': { name: '3 недели (21 день)', price: 14280, daily: 680 },
-      '30d': { name: '1 месяц (30 дней)', price: 17000, daily: 567 },
-    }
-  },
-  'ortonica650': {
-    name: 'Ортоника 650',
-    photos: [
-      'AgACAgIAAxkBAAN8amfaSC6refFdfAMxEUjXH1uYuzIAAkQjaxvS5jlLRbTOk14z6doBAAMCAAN5AAM9BA',
-      'AgACAgIAAxkBAAN9amfaSDhJJD6vHGpkMenOB94wdIIAAkUjaxvS5jlLlP-fPJA6JHABAAMCAAN4AAM9BA',
-      'AgACAgIAAxkBAAN-amfaSMXWckW-9JDEtzNrBvwrWcwAAkYjaxvS5jlLIgwors7eKCoBAAMCAAN5AAM9BA',
-      'AgACAgIAAxkBAAN_amfaSD2D1VP1dXyf3ihKtVML5agAAkcjaxvS5jlLRR1gBkAfvW0BAAMCAAN4AAM9BA',
-      'AgACAgIAAxkBAAOAamfaSE8CWdw5UlahL7MIiy4I1AMAAkgjaxvS5jlLrdSCLqJ6NgwBAAMCAAN5AAM9BA',
-      'AgACAgIAAxkBAAOBamfaSIC2Bhg-A_Ok3TcNlkv4iMAAAkkjaxvS5jlLDcv6GKaPiWsBAAMCAAN5AAM9BA',
-      'AgACAgIAAxkBAAOCamfaSO6tfk0QftMj3CZxHOlOD5EAAkojaxvS5jlLSUgBHr18BoQBAAMCAAN5AAM9BA',
-    ],
-    specs: '🚀 Скорость: 6 км/ч\n⚡ Запас хода: 20 км\n⚖️ Вес: 23 кг\n🏋️ Макс. нагрузка: 130 кг\n🟢 Самая компактная модель. Идеальна для квартиры.',
-    prices: {
-      '1d': { name: '1 день', price: 2334, daily: 2334 },
-      '3d': { name: '3 дня', price: 5002, daily: 1667 },
-      '7d': { name: '1 неделя (7 дней)', price: 8645, daily: 1235 },
-      '14d': { name: '2 недели (14 дней)', price: 13300, daily: 950 },
-      '21d': { name: '3 недели (21 день)', price: 15960, daily: 760 },
-      '30d': { name: '1 месяц (30 дней)', price: 19000, daily: 633 },
-    }
-  },
-  'ortonica690': {
-    name: 'Ортоника 690',
-    photos: [
-      'AgACAgIAAxkBAANXamfaAAHiqFH1yBQ6UR0_LC9E62F_AAI2I2sb0uY5SzffZnbqGTx5AQADAgADeQADPQQ',
-      'AgACAgIAAxkBAANYamfaAAFSA74kqbD8p5Z-USgiDf2BAAI3I2sb0uY5SzP3adhBiqgfAQADAgADeAADPQQ',
-      'AgACAgIAAxkBAANZamfaAAHLL1IS6tEIawvFrrxQop8DAAI4I2sb0uY5S3FyWmpfdi1PAQADAgADeAADPQQ',
-      'AgACAgIAAxkBAANaamfaAAFHp7KWf8mWgURNEYE2dWX2AAI5I2sb0uY5S9w9qC7CDvAAAQEAAwIAA3gAAz0E',
-      'AgACAgIAAxkBAANbamfaAAHA6OdWiG8IYNpf7neQJnZPAAI6I2sb0uY5S3Fb9NPJpDgGAQADAgADeAADPQQ',
-      'AgACAgIAAxkBAANcamfaAAE5L-ZXDgHLpks2Y1LPhPZhAAI7I2sb0uY5S6ryOIDmTVx2AQADAgADeAADPQQ',
-      'AgACAgIAAxkBAANdamfaAAHqwbhnQfwf2uK3g0HvhFfxAAI8I2sb0uY5S95ph7xtUf2lAQADAgADeAADPQQ',
-    ],
-    specs: '🚀 Скорость: 8 км/ч\n⚡ Запас хода: 20 км\n⚖️ Вес: 25 кг\n🏋️ Макс. нагрузка: 150 кг\n🟢 Стильное кресло с приятной эргономикой.',
-    prices: {
-      '1d': { name: '1 день', price: 2580, daily: 2580 },
-      '3d': { name: '3 дня', price: 5528, daily: 1843 },
-      '7d': { name: '1 неделя (7 дней)', price: 9555, daily: 1365 },
-      '14d': { name: '2 недели (14 дней)', price: 14700, daily: 1050 },
-      '21d': { name: '3 недели (21 день)', price: 17640, daily: 840 },
-      '30d': { name: '1 месяц (30 дней)', price: 21000, daily: 700 },
-    }
-  },
-  'ortonica750': {
-    name: 'Ортоника 750',
-    photos: [
-      'AgACAgIAAxkBAANtamfaOfBzPz1bcengmeqXScRqQ2gAAj0jaxvS5jlL-ks51_fZah4BAAMCAAN4AAM9BA',
-      'AgACAgIAAxkBAANuamfaOX9vYbFLpINL6z_KfqEmlGQAAj4jaxvS5jlLgPYYSha1t6UBAAMCAAN4AAM9BA',
-      'AgACAgIAAxkBAANvamfaOfVcCzH-OmjqHo-RmJb4SxsAAj8jaxvS5jlL9Sl8vrEvGggBAAMCAAN5AAM9BA',
-      'AgACAgIAAxkBAANwamfaOedxoyzZ7a0W5eY9Kj7OKOwAAkAjaxvS5jlL8RV5NmpjqYUBAAMCAAN4AAM9BA',
-      'AgACAgIAAxkBAANxamfaOfKTmCLMVj64XQKWp5SSidQAAkEjaxvS5jlLeCRnTO_udHoBAAMCAAN4AAM9BA',
-      'AgACAgIAAxkBAANyamfaOe2O0DB1KzHR-Nhk93_8nTcAAkIjaxvS5jlLmAfUBuGTQHMBAAMCAAN4AAM9BA',
-      'AgACAgIAAxkBAANzamfaOQ9tKa53k6qsftRnq0U4PB0AAkMjaxvS5jlLOaVMdHsoGpQBAAMCAAN4AAM9BA',
-    ],
-    specs: '🚀 Скорость: 6 км/ч\n⚡ Запас хода: 25 км\n⚖️ Вес: 43 кг\n🏋️ Макс. нагрузка: 120 кг\n🟢 Флагман со всенаправленными колесами.',
-    prices: {
-      '1d': { name: '1 день', price: 3069, daily: 3069 },
-      '3d': { name: '3 дня', price: 6576, daily: 2192 },
-      '7d': { name: '1 неделя (7 дней)', price: 11366, daily: 1624 },
-      '14d': { name: '2 недели (14 дней)', price: 17486, daily: 1249 },
-      '21d': { name: '3 недели (21 день)', price: 20983, daily: 999 },
-      '30d': { name: '1 месяц (30 дней)', price: 24980, daily: 833 },
-    }
-  }
-};
-
-// СЦЕНАРИЙ ОФОРМЛЕНИЯ ЗАКАЗА
+// -------------------------------------------------------------
+// 📋 СЦЕНАРИЙ ОФОРМЛЕНИЯ ЗАКАЗА (ПРЯМОЙ И ЛИНЕЙНЫЙ)
+// -------------------------------------------------------------
 async function bookingConversation(conversation, ctx) {
-  const booking = await conversation.external((ctx) => {
-    return ctx.session?.bookingData || { model: 'Не указана', period: 'Не указан' };
-  });
+  // Получаем выбранную модель из сессии
+  const booking = await conversation.external((ctx) => ctx.session.bookingData || {});
 
-  const fzKeyboard = new InlineKeyboard().text('✅ Согласен с ФЗ-152', 'accept_fz152');
-  
-  await ctx.reply(
-    '🔒 <b>Обработка персональных данных (ФЗ-152)</b>\n\n' +
-    'Нажимая кнопку «Согласен», вы даете согласие на обработку персональных данных ' +
-    'для оформления договора аренды.\n\n' +
-    '⚠️ <i>Напоминаем: при передаче коляски потребуется оригинал паспорта РФ.</i>',
-    { parse_mode: 'HTML', reply_markup: fzKeyboard }
-  );
+  // 1. ФИО
+  await ctx.reply('Введите, пожалуйста, ваше <b>ФИО полностью</b>:', { parse_mode: 'HTML' });
+  const { message: { text: fio } } = await conversation.waitFor('message:text');
 
-  await conversation.waitForCallbackQuery('accept_fz152');
-  await ctx.reply('Отлично! Введите, пожалуйста, ваше <b>ФИО полностью</b>:', { parse_mode: 'HTML' });
-
-  const fioCtx = await conversation.waitFor('message:text');
-  const fio = fioCtx.message.text;
-
+  // 2. Телефон
   const phoneKeyboard = new Keyboard()
     .requestContact('📱 Поделиться номером телефона')
     .resized()
@@ -158,6 +68,7 @@ async function bookingConversation(conversation, ctx) {
     ? phoneCtx.message.contact.phone_number 
     : phoneCtx.message.text;
 
+  // 3. Адрес и Дата
   const mainKeyboard = getMainMenuKeyboard();
   await ctx.reply('Укажите <b>город, адрес и желаемую дату/время доставки</b>:', { 
     parse_mode: 'HTML',
@@ -167,19 +78,21 @@ async function bookingConversation(conversation, ctx) {
   const addressCtx = await conversation.waitFor('message:text');
   const addressAndDate = addressCtx.message.text;
 
+  // 4. Сохранение в Google Таблицу
   try {
     await saveOrder({
       userId: ctx.from.id,
       fio,
       phone,
       addressAndDate,
-      model: booking.model,
-      period: booking.period,
+      model: booking.model || 'Не указана',
+      period: booking.period || 'Не указан',
     });
   } catch (e) {
     console.error('Ошибка записи в Google Таблицу:', e.message);
   }
 
+  // 5. Уведомление клиенту
   const finishText = 
     `🎉 <b>Ваша заявка успешно принята!</b>\n\n` +
     `🛵 <b>Модель:</b> ${booking.model}\n` +
@@ -191,6 +104,7 @@ async function bookingConversation(conversation, ctx) {
 
   await ctx.reply(finishText, { parse_mode: 'HTML', reply_markup: mainKeyboard });
 
+  // 6. Уведомление админу
   const adminMsg = 
     `📥 <b>НОВАЯ ЗАЯВКА НА АРЕНДУ!</b>\n\n` +
     `🛵 <b>Модель:</b> ${booking.model}\n` +
@@ -198,8 +112,7 @@ async function bookingConversation(conversation, ctx) {
     `👤 <b>ФИО:</b> ${fio}\n` +
     `📞 <b>Тел:</b> ${phone}\n` +
     `📍 <b>Адрес/Дата:</b> ${addressAndDate}\n\n` +
-    `💬 <a href="tg://user?id=${ctx.from.id}">Написать клиенту</a>\n` +
-    `📄 <i>Не забудьте проверить паспорт РФ при передаче!</i>`;
+    `💬 <a href="tg://user?id=${ctx.from.id}">Написать клиенту</a>`;
 
   try {
     if (process.env.ADMIN_CHAT_ID) {
@@ -210,9 +123,79 @@ async function bookingConversation(conversation, ctx) {
   }
 }
 
+// Регистрируем диалог
 bot.use(createConversation(bookingConversation));
 
-// КНОПКИ И ОБРАБОТЧИКИ
+// -------------------------------------------------------------
+// 📦 БАЗА ДАННЫХ МОДЕЛЕЙ И ЦЕН
+// -------------------------------------------------------------
+const MODELS_INFO = {
+  'ortonica620': {
+    name: 'Ортоника 620',
+    photos: [
+      'AgACAgIAAxkBAAMYamfVDXqYTHvBH6p6GFI-h_ahSwEAAjAjaxvS5jlL4lgiueYZa0kBAAMCAAN4AAM9BA',
+      'AgACAgIAAxkBAAMZamfVDYjblPSiCzhGuafvj_n-TtgAAjIjaxvS5jlLmYldsmw1hZ4BAAMCAAN4AAM9BA',
+    ],
+    specs: '🚀 Скорость: 6 км/ч\n⚡ Запас хода: 20 км\n⚖️ Вес: 26 кг\n🏋️ Макс. нагрузка: 120 кг',
+    prices: {
+      '1d': { name: '1 день', price: 2088, daily: 2088 },
+      '3d': { name: '3 дня', price: 4475, daily: 1492 },
+      '7d': { name: '1 неделя (7 дней)', price: 7735, daily: 1105 },
+      '14d': { name: '2 недели (14 дней)', price: 11900, daily: 850 },
+      '21d': { name: '3 недели (21 день)', price: 14280, daily: 680 },
+      '30d': { name: '1 месяц (30 дней)', price: 17000, daily: 567 },
+    }
+  },
+  'ortonica650': {
+    name: 'Ортоника 650',
+    photos: [
+      'AgACAgIAAxkBAAN8amfaSC6refFdfAMxEUjXH1uYuzIAAkQjaxvS5jlLRbTOk14z6doBAAMCAAN5AAM9BA',
+    ],
+    specs: '🚀 Скорость: 6 км/ч\n⚡ Запас хода: 20 км\n⚖️ Вес: 23 кг\n🏋️ Макс. нагрузка: 130 кг',
+    prices: {
+      '1d': { name: '1 день', price: 2334, daily: 2334 },
+      '3d': { name: '3 дня', price: 5002, daily: 1667 },
+      '7d': { name: '1 неделя (7 дней)', price: 8645, daily: 1235 },
+      '14d': { name: '2 недели (14 дней)', price: 13300, daily: 950 },
+      '21d': { name: '3 недели (21 день)', price: 15960, daily: 760 },
+      '30d': { name: '1 месяц (30 дней)', price: 19000, daily: 633 },
+    }
+  },
+  'ortonica690': {
+    name: 'Ортоника 690',
+    photos: [
+      'AgACAgIAAxkBAANXamfaAAHiqFH1yBQ6UR0_LC9E62F_AAI2I2sb0uY5SzffZnbqGTx5AQADAgADeQADPQQ',
+    ],
+    specs: '🚀 Скорость: 8 км/ч\n⚡ Запас хода: 20 км\n⚖️ Вес: 25 кг\n🏋️ Макс. нагрузка: 150 кг',
+    prices: {
+      '1d': { name: '1 день', price: 2580, daily: 2580 },
+      '3d': { name: '3 дня', price: 5528, daily: 1843 },
+      '7d': { name: '1 неделя (7 дней)', price: 9555, daily: 1365 },
+      '14d': { name: '2 недели (14 дней)', price: 14700, daily: 1050 },
+      '21d': { name: '3 недели (21 день)', price: 17640, daily: 840 },
+      '30d': { name: '1 месяц (30 дней)', price: 21000, daily: 700 },
+    }
+  },
+  'ortonica750': {
+    name: 'Ортоника 750',
+    photos: [
+      'AgACAgIAAxkBAANtamfaOfBzPz1bcengmeqXScRqQ2gAAj0jaxvS5jlL-ks51_fZah4BAAMCAAN4AAM9BA',
+    ],
+    specs: '🚀 Скорость: 6 км/ч\n⚡ Запас хода: 25 км\n⚖️ Вес: 43 кг\n🏋️ Макс. нагрузка: 120 кг',
+    prices: {
+      '1d': { name: '1 день', price: 3069, daily: 3069 },
+      '3d': { name: '3 дня', price: 6576, daily: 2192 },
+      '7d': { name: '1 неделя (7 дней)', price: 11366, daily: 1624 },
+      '14d': { name: '2 недели (14 дней)', price: 17486, daily: 1249 },
+      '21d': { name: '3 недели (21 день)', price: 20983, daily: 999 },
+      '30d': { name: '1 месяц (30 дней)', price: 24980, daily: 833 },
+    }
+  }
+};
+
+// -------------------------------------------------------------
+// 🪟 КНОПКИ И ОБРАБОТЧИКИ МЕНЮ
+// -------------------------------------------------------------
 function getMainMenuKeyboard() {
   return new Keyboard()
     .text('🛵 Каталог колясок').text('❓ Нужна консультация').row()
@@ -263,7 +246,7 @@ bot.callbackQuery(/^model_(.+)$/, async (ctx) => {
 
   if (model.photos && model.photos.length > 0) {
     const mediaGroup = model.photos.map(fileId => ({ type: 'photo', media: fileId }));
-    await ctx.replyWithMediaGroup(mediaGroup);
+    await ctx.replyWithMediaGroup(mediaGroup).catch(() => {});
   }
 
   const p = model.prices;
@@ -290,6 +273,9 @@ bot.callbackQuery('back_to_catalog', async (ctx) => {
   await ctx.reply('🛵 <b>Каталог электроколясок:</b>', { parse_mode: 'HTML', reply_markup: getCatalogKeyboard() });
 });
 
+// -------------------------------------------------------------
+// 🔥 ВЫБОР ПЕРИОДА (КЛЮЧЕВАЯ ИСПРАВЛЕННАЯ ЧАСТЬ)
+// -------------------------------------------------------------
 bot.callbackQuery(/^book_([^_]+)_(.+)$/, async (ctx) => {
   const modelKey = ctx.match[1];
   const periodKey = ctx.match[2];
@@ -301,20 +287,41 @@ bot.callbackQuery(/^book_([^_]+)_(.+)$/, async (ctx) => {
 
   const selectedPeriod = model.prices[periodKey];
 
+  // Записываем данные в сессию
   if (!ctx.session) ctx.session = {};
   ctx.session.bookingData = {
     model: model.name,
     period: `${selectedPeriod.name} (${selectedPeriod.price.toLocaleString('ru-RU')} ₽)`,
   };
 
-  await notifyAdminLog(ctx, `Выбрал тариф: ${model.name} — ${selectedPeriod.name}`);
+  // Гасим анимацию кнопки
   await ctx.answerCallbackQuery();
+  await notifyAdminLog(ctx, `Выбрал тариф: ${model.name} — ${selectedPeriod.name}`);
+
+  // Показываем кнопку Согласия ФЗ-152 ОТДЕЛЬНО
+  const fzKeyboard = new InlineKeyboard().text('✅ Согласен с ФЗ-152', 'start_booking_now');
+
+  await ctx.reply(
+    '🔒 <b>Обработка персональных данных (ФЗ-152)</b>\n\n' +
+    'Нажимая кнопку «Согласен», вы даете согласие на обработку персональных данных ' +
+    'для оформления договора аренды.\n\n' +
+    '⚠️ <i>Напоминаем: при передаче коляски потребуется оригинал паспорта РФ.</i>',
+    { parse_mode: 'HTML', reply_markup: fzKeyboard }
+  );
+});
+
+// Клик по кнопке «Согласен с ФЗ-152» запускает ввод данных!
+bot.callbackQuery('start_booking_now', async (ctx) => {
+  await ctx.answerCallbackQuery();
+  // Входим в разговор строго после нажатия кнопки
   await ctx.conversation.enter('bookingConversation');
 });
 
+// -------------------------------------------------------------
+// ИНФОРМАЦИОННЫЕ РАЗДЕЛЫ
+// -------------------------------------------------------------
 bot.hears('ℹ️ Условия аренды', async (ctx) => {
   await notifyAdminLog(ctx, 'Открыл «Условия аренды»');
-  
   const text = 
     `📜 <b>Условия аренды, доставки и залога</b>\n\n` +
     `🏙️ <b>Москва и Московская область:</b>\n` +
@@ -339,7 +346,6 @@ bot.hears('ℹ️ Условия аренды', async (ctx) => {
 
 bot.hears('📞 Контакты', async (ctx) => {
   await notifyAdminLog(ctx, 'Открыл «Контакты»');
-  
   const text = 
     `📞 <b>Контакты и Адреса</b>\n\n` +
     `📍 <b>Санкт-Петербург (Самовывоз):</b>\n` +
@@ -349,105 +355,16 @@ bot.hears('📞 Контакты', async (ctx) => {
     `📱 <b>Связь с менеджером:</b> Нажмите кнопку ниже для перехода в чат:`;
 
   const keyboard = new InlineKeyboard().url('💬 Написать Вячеславу', 'https://t.me/slava_ae');
-
   await ctx.reply(text, { parse_mode: 'HTML', reply_markup: keyboard });
-});
-
-// ОПРОС
-bot.hears('❓ Нужна консультация', async (ctx) => {
-  await notifyAdminLog(ctx, 'Запустил опрос подбора');
-  if (!ctx.session) ctx.session = {};
-  ctx.session.quiz = {};
-  
-  const keyboard = new InlineKeyboard()
-    .text('До 80 кг', 'quiz_w_80').row()
-    .text('80 – 110 кг', 'quiz_w_110').row()
-    .text('Более 110 кг', 'quiz_w_140');
-
-  await ctx.reply('<b>Шаг 1 из 3:</b> Укажите примерный вес пользователя:', {
-    parse_mode: 'HTML',
-    reply_markup: keyboard,
-  });
-});
-
-bot.callbackQuery(/^quiz_w_(.+)$/, async (ctx) => {
-  if (!ctx.session) ctx.session = {};
-  if (!ctx.session.quiz) ctx.session.quiz = {};
-  ctx.session.quiz.weight = ctx.match[1];
-  await ctx.answerCallbackQuery();
-
-  const keyboard = new InlineKeyboard()
-    .text('🏠 В основном дома', 'quiz_l_home').row()
-    .text('🌳 Прогулки по городу', 'quiz_l_city').row()
-    .text('✈️ Поездки (багажник авто)', 'quiz_l_travel');
-
-  await ctx.editMessageText('<b>Шаг 2 из 3:</b> Где планируете чаще использовать коляску?', {
-    parse_mode: 'HTML',
-    reply_markup: keyboard,
-  });
-});
-
-bot.callbackQuery(/^quiz_l_(.+)$/, async (ctx) => {
-  if (!ctx.session) ctx.session = {};
-  if (!ctx.session.quiz) ctx.session.quiz = {};
-  ctx.session.quiz.location = ctx.match[1];
-  await ctx.answerCallbackQuery();
-
-  const keyboard = new InlineKeyboard()
-    .text('🔋 До 20 км', 'quiz_r_short').row()
-    .text('🔋 От 30 км и более', 'quiz_r_long');
-
-  await ctx.editMessageText('<b>Шаг 3 из 3:</b> Какой запас хода вам необходим?', {
-    parse_mode: 'HTML',
-    reply_markup: keyboard,
-  });
-});
-
-bot.callbackQuery(/^quiz_r_(.+)$/, async (ctx) => {
-  if (!ctx.session) ctx.session = {};
-  if (!ctx.session.quiz) ctx.session.quiz = {};
-  ctx.session.quiz.range = ctx.match[1];
-  await ctx.answerCallbackQuery();
-
-  const { weight, location } = ctx.session.quiz;
-  let recKey = 'ortonica650';
-
-  if (weight === '140' || location === 'city') recKey = 'ortonica690';
-  if (location === 'travel') recKey = 'ortonica750';
-  if (weight === '80' && location === 'home') recKey = 'ortonica620';
-
-  const recommendedModel = MODELS_INFO[recKey];
-  await notifyAdminLog(ctx, `Завершил опрос. Рекомендация: ${recommendedModel.name}`);
-
-  const keyboard = new InlineKeyboard()
-    .text(`Посмотреть ${recommendedModel.name}`, `model_${recKey}`).row()
-    .text('📞 Консультация с менеджером', 'ask_manager');
-
-  await ctx.editMessageText(
-    `🎯 <b>Результат подбора:</b>\n\n` +
-    `Вам отлично подойдет модель <b>${recommendedModel.name}</b>!\n` +
-    `<i>${recommendedModel.specs.split('\n')[0]}</i>\n\n` +
-    `Хотите перейти к просмотру тарифных планов этой модели?`,
-    { parse_mode: 'HTML', reply_markup: keyboard }
-  );
-});
-
-bot.callbackQuery('ask_manager', async (ctx) => {
-  await ctx.answerCallbackQuery();
-  await notifyAdminLog(ctx, 'Запросил прямую связь с менеджером из опроса');
-  
-  const keyboard = new InlineKeyboard().url('💬 Написать Вячеславу', 'https://t.me/slava_ae');
-
-  await ctx.reply('Менеджер уведомлен! Вы можете написать Вячеславу напрямую по кнопке ниже:', {
-    reply_markup: keyboard,
-  });
 });
 
 bot.catch((err) => {
   console.error('Ошибка в работе бота:', err.message);
 });
 
-// ВЕБ-СЕРВЕР ДЛЯ RENDER FREE WEB SERVICE
+// -------------------------------------------------------------
+// 🌐 ВЕБ-СЕРВЕР ДЛЯ RENDER
+// -------------------------------------------------------------
 const PORT = process.env.PORT || 10000;
 const server = http.createServer((req, res) => {
   res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
