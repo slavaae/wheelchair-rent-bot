@@ -1,19 +1,28 @@
 const { Bot, session, InlineKeyboard, Keyboard } = require('grammy');
 const { conversations, createConversation } = require('@grammyjs/conversations');
 const { saveOrder } = require('./googleSheets');
+const http = require('http');
 require('dotenv').config();
 
 const bot = new Bot(process.env.BOT_TOKEN);
 
-// Подключение сессий и разговоров
-bot.use(session({ initial: () => ({ bookingData: {}, quiz: {} }) }));
+// -------------------------------------------------------------
+// 1. ПОДКЛЮЧЕНИЕ СЕССИЙ И РАЗГОВОРОВ (СТРОГИЙ ПОРЯДОК)
+// -------------------------------------------------------------
+bot.use(
+  session({
+    initial: () => ({ bookingData: {}, quiz: {} }),
+  })
+);
+
 bot.use(conversations());
 
 // -------------------------------------------------------------
-// 🛠️ ВСПОМОГАТЕЛЬНАЯ ФУНКЦИЯ ЛОГИРОВАНИЯ ДЕЙСТВИЙ КЛИЕНТА В ЛС АДМИНУ
+// 🛠️ ВСПОМОГАТЕЛЬНАЯ ФУНКЦИЯ ЛОГИРОВАНИЯ ДЕЙСТВИЙ В ЛС АДМИНУ
 // -------------------------------------------------------------
 async function notifyAdminLog(ctx, actionText) {
   try {
+    if (!process.env.ADMIN_CHAT_ID) return;
     const user = ctx.from;
     const name = [user.first_name, user.last_name].filter(Boolean).join(' ');
     const username = user.username ? `@${user.username}` : 'без username';
@@ -31,7 +40,7 @@ async function notifyAdminLog(ctx, actionText) {
 }
 
 // -------------------------------------------------------------
-// 📦 БАЗА ДАННЫХ МОДЕЛЕЙ И ЦЕН (ОБНОВЛЕННЫЕ ХАРАКТЕРИСТИКИ)
+// 📦 БАЗА ДАННЫХ МОДЕЛЕЙ И ЦЕН
 // -------------------------------------------------------------
 const MODELS_INFO = {
   'ortonica620': {
@@ -120,7 +129,7 @@ const MODELS_INFO = {
 };
 
 // -------------------------------------------------------------
-// 📋 РАЗГОВОР ОФОРМЛЕНИЯ ЗАКАЗА (CONVERSATION)
+// 📋 РАЗГОВОР ОФОРМЛЕНИЯ ЗАКАЗА
 // -------------------------------------------------------------
 async function bookingConversation(conversation, ctx) {
   const booking = await conversation.external((ctx) => {
@@ -140,11 +149,11 @@ async function bookingConversation(conversation, ctx) {
   await conversation.waitForCallbackQuery('accept_fz152');
   await ctx.reply('Отлично! Введите, пожалуйста, ваше <b>ФИО полностью</b>:', { parse_mode: 'HTML' });
 
-  // 1. Сбор ФИО
+  // 1. ФИО
   const fioCtx = await conversation.waitFor('message:text');
   const fio = fioCtx.message.text;
 
-  // 2. Сбор Телефона
+  // 2. Телефон
   const phoneKeyboard = new Keyboard()
     .requestContact('📱 Поделиться номером телефона')
     .resized()
@@ -159,7 +168,7 @@ async function bookingConversation(conversation, ctx) {
     ? phoneCtx.message.contact.phone_number 
     : phoneCtx.message.text;
 
-  // 3. Сбор Адреса и Даты
+  // 3. Адрес и Дата
   const mainKeyboard = getMainMenuKeyboard();
   await ctx.reply('Укажите <b>город, адрес и желаемую дату/время доставки</b>:', { 
     parse_mode: 'HTML',
@@ -207,18 +216,22 @@ async function bookingConversation(conversation, ctx) {
     `📄 <i>Не забудьте проверить паспорт РФ при передаче!</i>`;
 
   try {
-    await ctx.api.sendMessage(process.env.ADMIN_CHAT_ID, adminMsg, { parse_mode: 'HTML' });
+    if (process.env.ADMIN_CHAT_ID) {
+      await ctx.api.sendMessage(process.env.ADMIN_CHAT_ID, adminMsg, { parse_mode: 'HTML' });
+    }
   } catch (adminErr) {
     console.error('Ошибка отправки админу:', adminErr.message);
   }
 }
 
+// -------------------------------------------------------------
+// 2. РЕГИСТРАЦИЯ КОНВЕРСАЦИИ
+// -------------------------------------------------------------
 bot.use(createConversation(bookingConversation));
 
 // -------------------------------------------------------------
-// 🪟 ОБРАБОТЧИКИ МЕНЮ И КНОПОК
+// 🪟 КНОПКИ И ОБРАБОТЧИКИ
 // -------------------------------------------------------------
-
 function getMainMenuKeyboard() {
   return new Keyboard()
     .text('🛵 Каталог колясок').text('❓ Нужна консультация').row()
@@ -235,7 +248,6 @@ function getCatalogKeyboard() {
     .text('Ортоника 750 (от 833 ₽/сут) 🔥', 'model_ortonica750').row();
 }
 
-// /start и Главное меню
 bot.command(['start', 'menu'], async (ctx) => {
   await notifyAdminLog(ctx, 'Запустил бота (/start)');
   await ctx.reply(
@@ -250,7 +262,6 @@ bot.hears('🏠 Главное меню', async (ctx) => {
   await ctx.reply('Вы вернулись в главное меню:', { reply_markup: getMainMenuKeyboard() });
 });
 
-// Меню Каталога
 bot.hears('🛵 Каталог колясок', async (ctx) => {
   await notifyAdminLog(ctx, 'Открыл «Каталог колясок»');
   await ctx.reply(
@@ -260,7 +271,6 @@ bot.hears('🛵 Каталог колясок', async (ctx) => {
   );
 });
 
-// Карточка выбранной модели
 bot.callbackQuery(/^model_(.+)$/, async (ctx) => {
   const modelKey = ctx.match[1];
   const model = MODELS_INFO[modelKey];
@@ -299,7 +309,6 @@ bot.callbackQuery('back_to_catalog', async (ctx) => {
   await ctx.reply('🛵 <b>Каталог электроколясок:</b>', { parse_mode: 'HTML', reply_markup: getCatalogKeyboard() });
 });
 
-// Выбор тарифного периода
 bot.callbackQuery(/^book_([^_]+)_(.+)$/, async (ctx) => {
   const modelKey = ctx.match[1];
   const periodKey = ctx.match[2];
@@ -311,6 +320,8 @@ bot.callbackQuery(/^book_([^_]+)_(.+)$/, async (ctx) => {
 
   const selectedPeriod = model.prices[periodKey];
 
+  // Безопасная инициализация сессии
+  if (!ctx.session) ctx.session = {};
   ctx.session.bookingData = {
     model: model.name,
     period: `${selectedPeriod.name} (${selectedPeriod.price.toLocaleString('ru-RU')} ₽)`,
@@ -321,7 +332,6 @@ bot.callbackQuery(/^book_([^_]+)_(.+)$/, async (ctx) => {
   await ctx.conversation.enter('bookingConversation');
 });
 
-// Условия аренды
 bot.hears('ℹ️ Условия аренды', async (ctx) => {
   await notifyAdminLog(ctx, 'Открыл «Условия аренды»');
   
@@ -347,7 +357,6 @@ bot.hears('ℹ️ Условия аренды', async (ctx) => {
   await ctx.reply(text, { parse_mode: 'HTML' });
 });
 
-// Контакты
 bot.hears('📞 Контакты', async (ctx) => {
   await notifyAdminLog(ctx, 'Открыл «Контакты»');
   
@@ -365,10 +374,11 @@ bot.hears('📞 Контакты', async (ctx) => {
 });
 
 // -------------------------------------------------------------
-// ❓ ОПРОС ДЛЯ ПОДБОРА МОДЕЛИ
+// ❓ ОПРОС
 // -------------------------------------------------------------
 bot.hears('❓ Нужна консультация', async (ctx) => {
   await notifyAdminLog(ctx, 'Запустил опрос подбора');
+  if (!ctx.session) ctx.session = {};
   ctx.session.quiz = {};
   
   const keyboard = new InlineKeyboard()
@@ -383,6 +393,8 @@ bot.hears('❓ Нужна консультация', async (ctx) => {
 });
 
 bot.callbackQuery(/^quiz_w_(.+)$/, async (ctx) => {
+  if (!ctx.session) ctx.session = {};
+  if (!ctx.session.quiz) ctx.session.quiz = {};
   ctx.session.quiz.weight = ctx.match[1];
   await ctx.answerCallbackQuery();
 
@@ -398,6 +410,8 @@ bot.callbackQuery(/^quiz_w_(.+)$/, async (ctx) => {
 });
 
 bot.callbackQuery(/^quiz_l_(.+)$/, async (ctx) => {
+  if (!ctx.session) ctx.session = {};
+  if (!ctx.session.quiz) ctx.session.quiz = {};
   ctx.session.quiz.location = ctx.match[1];
   await ctx.answerCallbackQuery();
 
@@ -412,6 +426,8 @@ bot.callbackQuery(/^quiz_l_(.+)$/, async (ctx) => {
 });
 
 bot.callbackQuery(/^quiz_r_(.+)$/, async (ctx) => {
+  if (!ctx.session) ctx.session = {};
+  if (!ctx.session.quiz) ctx.session.quiz = {};
   ctx.session.quiz.range = ctx.match[1];
   await ctx.answerCallbackQuery();
 
@@ -450,7 +466,20 @@ bot.callbackQuery('ask_manager', async (ctx) => {
 });
 
 bot.catch((err) => {
-  console.error('Ошибка в работе бота:', err);
+  console.error('Ошибка в работе бота:', err.message);
+});
+
+// -------------------------------------------------------------
+// 🌐 ВЕБ-СЕРВЕР ДЛЯ RENDER FREE WEB SERVICE
+// -------------------------------------------------------------
+const PORT = process.env.PORT || 10000;
+const server = http.createServer((req, res) => {
+  res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
+  res.end('Bot is active 24/7!');
+});
+
+server.listen(PORT, () => {
+  console.log(`🌐 Веб-сервер запущен на порту ${PORT}`);
 });
 
 bot.start();
