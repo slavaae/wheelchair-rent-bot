@@ -6,7 +6,7 @@ require('dotenv').config();
 const bot = new Bot(process.env.BOT_TOKEN);
 
 // -------------------------------------------------------------
-// 1. СЕССИИ (Простая надёжная схема)
+// 1. СЕССИИ (Простая надежная схема)
 // -------------------------------------------------------------
 bot.use(
   session({
@@ -15,7 +15,7 @@ bot.use(
 );
 
 // -------------------------------------------------------------
-// 🛠️ ЛОГИРОВАНИЕ ДЕЙСТВИЙ АДМИНУ
+// 🛠️ ЛОГИРОВАНИЕ ДЕЙСТВИЙ АДМИНУ (БЕЗОПАСНОЕ)
 // -------------------------------------------------------------
 async function notifyAdminLog(ctx, actionText) {
   try {
@@ -32,7 +32,7 @@ async function notifyAdminLog(ctx, actionText) {
 
     await ctx.api.sendMessage(process.env.ADMIN_CHAT_ID, logMsg, { parse_mode: 'HTML' });
   } catch (e) {
-    console.error('Ошибка логирования действий админу:', e.message);
+    console.error('⚠️ Не удалось отправить лог админу:', e.message);
   }
 }
 
@@ -42,11 +42,7 @@ async function notifyAdminLog(ctx, actionText) {
 const MODELS_INFO = {
   'ortonica620': {
     name: 'Ортоника 620',
-    photos: [
-      'AgACAgIAAxkBAAMYamfVDXqYTHvBH6p6GFI-h_ahSwEAAjAjaxvS5jlL4lgiueYZa0kBAAMCAAN4AAM9BA',
-      'AgACAgIAAxkBAAMZamfVDYjblPSiCzhGuafvj_n-TtgAAjIjaxvS5jlLmYldsmw1hZ4BAAMCAAN4AAM9BA',
-    ],
-    specs: '🚀 Скорость: 6 км/ч\n⚡ Запас хода: 20 км\n⚖️ Вес: 26 кг\n🏋️ Макс. нагрузка: 120 кг',
+    specs: '🚀 Скорость: 6 км/ч\n⚡ Запас хода: 20 км\n⚖️ Вес: 26 кг\n🏋️ Макс. нагрузка: 120 кг\n🟢 Прочная и надежная модель.',
     prices: {
       '1d': { name: '1 день', price: 2088, daily: 2088 },
       '3d': { name: '3 дня', price: 4475, daily: 1492 },
@@ -58,10 +54,7 @@ const MODELS_INFO = {
   },
   'ortonica650': {
     name: 'Ортоника 650',
-    photos: [
-      'AgACAgIAAxkBAAN8amfaSC6refFdfAMxEUjXH1uYuzIAAkQjaxvS5jlLRbTOk14z6doBAAMCAAN5AAM9BA',
-    ],
-    specs: '🚀 Скорость: 6 км/ч\n⚡ Запас хода: 20 км\n⚖️ Вес: 23 кг\n🏋️ Макс. нагрузка: 130 кг',
+    specs: '🚀 Скорость: 6 км/ч\n⚡ Запас хода: 20 км\n⚖️ Вес: 23 кг\n🏋️ Макс. нагрузка: 130 кг\n🟢 Компактная модель для дома и прогулок.',
     prices: {
       '1d': { name: '1 день', price: 2334, daily: 2334 },
       '3d': { name: '3 дня', price: 5002, daily: 1667 },
@@ -73,10 +66,7 @@ const MODELS_INFO = {
   },
   'ortonica690': {
     name: 'Ортоника 690',
-    photos: [
-      'AgACAgIAAxkBAANXamfaAAHiqFH1yBQ6UR0_LC9E62F_AAI2I2sb0uY5SzffZnbqGTx5AQADAgADeQADPQQ',
-    ],
-    specs: '🚀 Скорость: 8 км/ч\n⚡ Запас хода: 20 км\n⚖️ Вес: 25 кг\n🏋️ Макс. нагрузка: 150 кг',
+    specs: '🚀 Скорость: 8 км/ч\n⚡ Запас хода: 20 км\n⚖️ Вес: 25 кг\n🏋️ Макс. нагрузка: 150 кг\n🟢 Усиленная конструкция и комфортное сиденье.',
     prices: {
       '1d': { name: '1 день', price: 2580, daily: 2580 },
       '3d': { name: '3 дня', price: 5528, daily: 1843 },
@@ -88,10 +78,7 @@ const MODELS_INFO = {
   },
   'ortonica750': {
     name: 'Ортоника 750',
-    photos: [
-      'AgACAgIAAxkBAANtamfaOfBzPz1bcengmeqXScRqQ2gAAj0jaxvS5jlL-ks51_fZah4BAAMCAAN4AAM9BA',
-    ],
-    specs: '🚀 Скорость: 6 км/ч\n⚡ Запас хода: 25 км\n⚖️ Вес: 43 кг\n🏋️ Макс. нагрузка: 120 кг',
+    specs: '🚀 Скорость: 6 км/ч\n⚡ Запас хода: 25 км\n⚖️ Вес: 43 кг\n🏋️ Макс. нагрузка: 120 кг\n🟢 Всенаправленные колеса (маневренность 360°).',
     prices: {
       '1d': { name: '1 день', price: 3069, daily: 3069 },
       '3d': { name: '3 дня', price: 6576, daily: 2192 },
@@ -123,10 +110,10 @@ function getCatalogKeyboard() {
 }
 
 // -------------------------------------------------------------
-// 📍 ОСНОВНЫЕ КОМАНДЫ
+// 📍 ОСНОВНЫЕ КОМАНДЫ И МЕНЮ
 // -------------------------------------------------------------
 bot.command(['start', 'menu'], async (ctx) => {
-  ctx.session.step = 'idle';
+  if (ctx.session) ctx.session.step = 'idle';
   await notifyAdminLog(ctx, 'Запустил бота (/start)');
   await ctx.reply(
     `Здравствуйте, ${ctx.from.first_name}!\n\n` +
@@ -136,17 +123,17 @@ bot.command(['start', 'menu'], async (ctx) => {
 });
 
 bot.hears('🏠 Главное меню', async (ctx) => {
-  ctx.session.step = 'idle';
+  if (ctx.session) ctx.session.step = 'idle';
   await notifyAdminLog(ctx, 'Нажал «Главное меню»');
   await ctx.reply('Вы вернулись в главное меню:', { reply_markup: getMainMenuKeyboard() });
 });
 
 bot.hears('🛵 Каталог колясок', async (ctx) => {
-  ctx.session.step = 'idle';
+  if (ctx.session) ctx.session.step = 'idle';
   await notifyAdminLog(ctx, 'Открыл «Каталог колясок»');
   await ctx.reply(
     '🛵 <b>Каталог электроколясок</b>\n\n' +
-    'Выберите модель для просмотра характеристик, фото и тарифов:',
+    'Выберите модель для просмотра характеристик и тарифов:',
     { parse_mode: 'HTML', reply_markup: getCatalogKeyboard() }
   );
 });
@@ -155,15 +142,10 @@ bot.callbackQuery(/^model_(.+)$/, async (ctx) => {
   const modelKey = ctx.match[1];
   const model = MODELS_INFO[modelKey];
 
-  if (!model) return ctx.answerCallbackQuery('Модель не найдена');
+  if (!model) return ctx.answerCallbackQuery('Модель не найдена').catch(() => {});
 
   await notifyAdminLog(ctx, `Смотрит модель: ${model.name}`);
-  await ctx.answerCallbackQuery();
-
-  if (model.photos && model.photos.length > 0) {
-    const mediaGroup = model.photos.map(fileId => ({ type: 'photo', media: fileId }));
-    await ctx.replyWithMediaGroup(mediaGroup).catch(() => {});
-  }
+  await ctx.answerCallbackQuery().catch(() => {});
 
   const p = model.prices;
   const keyboard = new InlineKeyboard()
@@ -185,12 +167,12 @@ bot.callbackQuery(/^model_(.+)$/, async (ctx) => {
 });
 
 bot.callbackQuery('back_to_catalog', async (ctx) => {
-  await ctx.answerCallbackQuery();
+  await ctx.answerCallbackQuery().catch(() => {});
   await ctx.reply('🛵 <b>Каталог электроколясок:</b>', { parse_mode: 'HTML', reply_markup: getCatalogKeyboard() });
 });
 
 // -------------------------------------------------------------
-// 🔥 ВЫБОР ПЕРИОДА АРЕНДЫ (МГНОВЕННЫЙ ОТВЕТ)
+// 🔥 ВЫБОР ПЕРИОДА АРЕНДЫ (БЕЗ НАВИСАНИЙ)
 // -------------------------------------------------------------
 bot.callbackQuery(/^book_([^_]+)_(.+)$/, async (ctx) => {
   const modelKey = ctx.match[1];
@@ -198,17 +180,18 @@ bot.callbackQuery(/^book_([^_]+)_(.+)$/, async (ctx) => {
   const model = MODELS_INFO[modelKey];
 
   if (!model) {
-    return ctx.answerCallbackQuery({ text: 'Модель не найдена', show_alert: true });
+    return ctx.answerCallbackQuery({ text: 'Модель не найдена', show_alert: true }).catch(() => {});
   }
 
   const selectedPeriod = model.prices[periodKey];
 
+  if (!ctx.session) ctx.session = {};
   ctx.session.bookingData = {
     model: model.name,
     period: `${selectedPeriod.name} (${selectedPeriod.price.toLocaleString('ru-RU')} ₽)`,
   };
 
-  await ctx.answerCallbackQuery();
+  await ctx.answerCallbackQuery().catch(() => {});
   await notifyAdminLog(ctx, `Выбрал тариф: ${model.name} — ${selectedPeriod.name}`);
 
   const fzKeyboard = new InlineKeyboard().text('✅ Согласен с ФЗ-152', 'accept_fz152_go');
@@ -222,23 +205,23 @@ bot.callbackQuery(/^book_([^_]+)_(.+)$/, async (ctx) => {
   );
 });
 
-// Клик «Согласен с ФЗ-152» ➔ Просим ФИО
 bot.callbackQuery('accept_fz152_go', async (ctx) => {
-  await ctx.answerCallbackQuery();
+  await ctx.answerCallbackQuery().catch(() => {});
+  if (!ctx.session) ctx.session = {};
   ctx.session.step = 'awaiting_fio';
   await ctx.reply('Отлично! Введите, пожалуйста, ваше <b>ФИО полностью</b>:', { parse_mode: 'HTML' });
 });
 
 // -------------------------------------------------------------
-// 📝 ПОШАГОВЫЙ СБОР ДАННЫХ (БЕЗ ПЛАГИНА CONVERSATIONS)
+// 📝 ПОШАГОВЫЙ СБОР ДАННЫХ
 // -------------------------------------------------------------
 bot.on('message', async (ctx, next) => {
   const step = ctx.session?.step;
 
-  // Если клиент вводит ФИО
   if (step === 'awaiting_fio') {
     if (!ctx.message.text) return ctx.reply('Пожалуйста, введите ваше ФИО текстом.');
     
+    if (!ctx.session.bookingData) ctx.session.bookingData = {};
     ctx.session.bookingData.fio = ctx.message.text;
     ctx.session.step = 'awaiting_phone';
 
@@ -252,11 +235,11 @@ bot.on('message', async (ctx, next) => {
     });
   }
 
-  // Если клиент вводит Телефон (текст или кнопка «Поделиться контактом»)
   if (step === 'awaiting_phone') {
     const phone = ctx.message.contact ? ctx.message.contact.phone_number : ctx.message.text;
     if (!phone) return ctx.reply('Пожалуйста, отправьте номер телефона.');
 
+    if (!ctx.session.bookingData) ctx.session.bookingData = {};
     ctx.session.bookingData.phone = phone;
     ctx.session.step = 'awaiting_address';
 
@@ -266,47 +249,44 @@ bot.on('message', async (ctx, next) => {
     });
   }
 
-  // Если клиент вводит Адрес и Дату (ФИНАЛ)
   if (step === 'awaiting_address') {
     if (!ctx.message.text) return ctx.reply('Пожалуйста, укажите адрес и дату текстом.');
 
     const addressAndDate = ctx.message.text;
-    const booking = ctx.session.bookingData;
-    ctx.session.step = 'idle'; // Сбрасываем шаг
+    const booking = ctx.session.bookingData || {};
+    ctx.session.step = 'idle';
 
-    // 1. Запись в Google Таблицу
+    // Запись в Гугл Таблицу (с защитой от падения бота)
     try {
       await saveOrder({
         userId: ctx.from.id,
-        fio: booking.fio,
-        phone: booking.phone,
+        fio: booking.fio || 'Не указано',
+        phone: booking.phone || 'Не указан',
         addressAndDate,
         model: booking.model || 'Не указана',
         period: booking.period || 'Не указан',
       });
     } catch (e) {
-      console.error('Ошибка записи в Google Таблицу:', e.message);
+      console.error(' Ошибка записи в Таблицу (клиенту всё равно ответили):', e.message);
     }
 
-    // 2. Ответ клиенту
     const finishText = 
       `🎉 <b>Ваша заявка успешно принята!</b>\n\n` +
-      `🛵 <b>Модель:</b> ${booking.model}\n` +
-      `⏱ <b>Период:</b> ${booking.period}\n` +
-      `👤 <b>ФИО:</b> ${booking.fio}\n` +
-      `📞 <b>Телефон:</b> ${booking.phone}\n` +
+      `🛵 <b>Модель:</b> ${booking.model || 'Не указана'}\n` +
+      `⏱ <b>Период:</b> ${booking.period || 'Не указан'}\n` +
+      `👤 <b>ФИО:</b> ${booking.fio || 'Не указано'}\n` +
+      `📞 <b>Телефон:</b> ${booking.phone || 'Не указан'}\n` +
       `📍 <b>Адрес и дата:</b> ${addressAndDate}\n\n` +
       `📞 <b>Менеджер свяжется с вами в ближайшее время для подтверждения.</b>`;
 
     await ctx.reply(finishText, { parse_mode: 'HTML', reply_markup: getMainMenuKeyboard() });
 
-    // 3. Уведомление админу
     const adminMsg = 
       `📥 <b>НОВАЯ ЗАЯВКА НА АРЕНДУ!</b>\n\n` +
-      `🛵 <b>Модель:</b> ${booking.model}\n` +
-      `⏱ <b>Период:</b> ${booking.period}\n` +
-      `👤 <b>ФИО:</b> ${booking.fio}\n` +
-      `📞 <b>Тел:</b> ${booking.phone}\n` +
+      `🛵 <b>Модель:</b> ${booking.model || 'Не указана'}\n` +
+      `⏱ <b>Период:</b> ${booking.period || 'Не указан'}\n` +
+      `👤 <b>ФИО:</b> ${booking.fio || 'Не указано'}\n` +
+      `📞 <b>Тел:</b> ${booking.phone || 'Не указан'}\n` +
       `📍 <b>Адрес/Дата:</b> ${addressAndDate}\n\n` +
       `💬 <a href="tg://user?id=${ctx.from.id}">Написать клиенту</a>`;
 
@@ -315,7 +295,7 @@ bot.on('message', async (ctx, next) => {
         await ctx.api.sendMessage(process.env.ADMIN_CHAT_ID, adminMsg, { parse_mode: 'HTML' });
       }
     } catch (adminErr) {
-      console.error('Ошибка отправки админу:', adminErr.message);
+      console.error(' Ошибка отправки админу:', adminErr.message);
     }
 
     return;
@@ -324,9 +304,6 @@ bot.on('message', async (ctx, next) => {
   return next();
 });
 
-// -------------------------------------------------------------
-// ИНФОРМАЦИОННЫЕ РАЗДЕЛЫ И КОНТАКТЫ
-// -------------------------------------------------------------
 bot.hears('ℹ️ Условия аренды', async (ctx) => {
   await notifyAdminLog(ctx, 'Открыл «Условия аренды»');
   const text = 
