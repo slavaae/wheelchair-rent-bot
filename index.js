@@ -6,7 +6,7 @@ require('dotenv').config();
 const bot = new Bot(process.env.BOT_TOKEN);
 
 // -------------------------------------------------------------
-// 1. СЕССИИ (Простая надежная схема)
+// 1. СЕССИИ
 // -------------------------------------------------------------
 bot.use(
   session({
@@ -15,7 +15,7 @@ bot.use(
 );
 
 // -------------------------------------------------------------
-// 🛠️ ЛОГИРОВАНИЕ ДЕЙСТВИЙ АДМИНУ (БЕЗОПАСНОЕ)
+// 🛠️ БЕЗОПАСНОЕ ЛОГИРОВАНИЕ ДЕЙСТВИЙ АДМИНУ
 // -------------------------------------------------------------
 async function notifyAdminLog(ctx, actionText) {
   try {
@@ -37,15 +37,16 @@ async function notifyAdminLog(ctx, actionText) {
 }
 
 // -------------------------------------------------------------
-// 📦 БАЗА ДАННЫХ МОДЕЛЕЙ И ЦЕН (ОБНОВЛЕННЫЕ ФОТО)
+// 📦 БАЗА ДАННЫХ МОДЕЛЕЙ И ЦЕН (ПРЯМЫЕ URL КАРТИНОК ИЗ IMGBB)
 // -------------------------------------------------------------
 const MODELS_INFO = {
   'ortonica620': {
     name: 'Ортоника 620',
     photos: [
-      'AgACAgIAAxkBAAMYamfVDXqYTHvBH6p6GFI-h_ahSwEAAjAjaxvS5jlL4lgiueYZa0kBAAMCAAN4AAM9BA',
-      'AgACAgIAAxkBAAMaamfVDXOjhGMWrRjVy-jCwYdcZmYAAjEjaxvS5jlLz-X3Y-jJYn4BAAMCAAN4AAM9BA',
-      'AgACAgIAAxkBAAMdamfVDcIluCeUO_5XSYD9V8aO4SEAAjUjaxvS5jlLObBYO01WkYQBAAMCAAN5AAM9BA',
+      'https://i.ibb.co/sdGvpTMv/image.jpg',
+      'https://i.ibb.co/4CsqHhs/image.jpg',
+      'https://i.ibb.co/xc0wk4w/image.jpg',
+      'https://i.ibb.co/v4zRDTQ0/image.jpg',
     ],
     specs: '🚀 Скорость: 6 км/ч\n⚡ Запас хода: 20 км\n⚖️ Вес: 26 кг\n🏋️ Макс. нагрузка: 120 кг\n🟢 Доступная стоимость. Прочная конструкция, которую сложно повредить.',
     prices: {
@@ -60,9 +61,9 @@ const MODELS_INFO = {
   'ortonica650': {
     name: 'Ортоника 650',
     photos: [
-      'AgACAgIAAxkBAAOAamfaSE8CWdw5UlahL7MIiy4I1AMAAkgjaxvS5jlLrdSCLqJ6NgwBAAMCAAN5AAM9BA',
-      'AgACAgIAAxkBAAOBamfaSIC2Bhg-A_Ok3TcNlkv4iMAAAkkjaxvS5jlLDcv6GKaPiWsBAAMCAAN5AAM9BA',
-      'AgACAgIAAxkBAAOCamfaSO6tfk0QftMj3CZxHOlOD5EAAkojaxvS5jlLSUgBHr18BoQBAAMCAAN5AAM9BA',
+      'https://i.ibb.co/rRqP7TWd/image.jpg',
+      'https://i.ibb.co/TBtx3LJK/image.jpg',
+      'https://i.ibb.co/0VZ9fSMP/image.jpg',
     ],
     specs: '🚀 Скорость: 6 км/ч\n⚡ Запас хода: 20 км\n⚖️ Вес: 23 кг\n🏋️ Макс. нагрузка: 130 кг\n🟢 Самая компактная модель. Идеальна для квартиры.',
     prices: {
@@ -77,9 +78,10 @@ const MODELS_INFO = {
   'ortonica690': {
     name: 'Ортоника 690',
     photos: [
-      'AgACAgIAAxkBAANXamfaAAHiqFH1yBQ6UR0_LC9E62F_AAI2I2sb0uY5SzffZnbqGTx5AQADAgADeQADPQQ',
-      'AgACAgIAAxkBAANYamfaAAFSA74kqbD8p5Z-USgiDf2BAAI3I2sb0uY5SzP3adhBiqgfAQADAgADeAADPQQ',
-      'AgACAgIAAxkBAANdamfaAAHqwbhnQfwf2uK3g0HvhFfxAAI8I2sb0uY5S95ph7xtUf2lAQADAgADeAADPQQ',
+      'https://i.ibb.co/KpPMYtrC/image.jpg',
+      'https://i.ibb.co/qYngTTgw/image.jpg',
+      'https://i.ibb.co/1GWDCWD0/image.jpg',
+      'https://i.ibb.co/99XzKNcV/image.jpg',
     ],
     specs: '🚀 Скорость: 8 км/ч\n⚡ Запас хода: 20 км\n⚖️ Вес: 25 кг\n🏋️ Макс. нагрузка: 150 кг\n🟢 Стильное кресло с приятной эргономикой.',
     prices: {
@@ -94,13 +96,10 @@ const MODELS_INFO = {
   'ortonica750': {
     name: 'Ортоника 750',
     photos: [
-      'AgACAgIAAxkBAANtamfaOfBzPz1bcengmeqXScRqQ2gAAj0jaxvS5jlL-ks51_fZah4BAAMCAAN4AAM9BA',
-      'AgACAgIAAxkBAANuamfaOX9vYbFLpINL6z_KfqEmlGQAAj4jaxvS5jlLgPYYSha1t6UBAAMCAAN4AAM9BA',
-      'AgACAgIAAxkBAANvamfaOfVcCzH-OmjqHo-RmJb4SxsAAj8jaxvS5jlL9Sl8vrEvGggBAAMCAAN5AAM9BA',
-      'AgACAgIAAxkBAANwamfaOedxoyzZ7a0W5eY9Kj7OKOwAAkAjaxvS5jlL8RV5NmpjqYUBAAMCAAN4AAM9BA',
-      'AgACAgIAAxkBAANxamfaOfKTmCLMVj64XQKWp5SSidQAAkEjaxvS5jlLeCRnTO_udHoBAAMCAAN4AAM9BA',
-      'AgACAgIAAxkBAANyamfaOe2O0DB1KzHR-Nhk93_8nTcAAkIjaxvS5jlLmAfUBuGTQHMBAAMCAAN4AAM9BA',
-      'AgACAgIAAxkBAANzamfaOQ9tKa53k6qsftRnq0U4PB0AAkMjaxvS5jlLOaVMdHsoGpQBAAMCAAN4AAM9BA',
+      'https://i.ibb.co/j94hPSrd/image.jpg',
+      'https://i.ibb.co/3GS16Mr/image.jpg',
+      'https://i.ibb.co/vxYb2WVV/image.jpg',
+      'https://i.ibb.co/7tcd5yNc/image.jpg',
     ],
     specs: '🚀 Скорость: 6 км/ч\n⚡ Запас хода: 25 км\n⚖️ Вес: 43 кг\n🏋️ Макс. нагрузка: 120 кг\n🟢 Флагман со всенаправленными колесами.',
     prices: {
@@ -162,7 +161,7 @@ bot.hears('🛵 Каталог колясок', async (ctx) => {
   );
 });
 
-// 🔥 ПРОСМОТР МОДЕЛИ
+// 🔥 БЕЗОПАСНЫЙ ПРОСМОТР МОДЕЛИ С ГАЛЕРЕЕЙ ССЫЛОК
 bot.callbackQuery(/^model_(.+)$/, async (ctx) => {
   const modelKey = ctx.match[1];
   const model = MODELS_INFO[modelKey];
@@ -172,13 +171,15 @@ bot.callbackQuery(/^model_(.+)$/, async (ctx) => {
   await notifyAdminLog(ctx, `Смотрит модель: ${model.name}`);
   await ctx.answerCallbackQuery().catch(() => {});
 
+  // 1. Отправка фотогалереи по прямым URL
   if (model.photos && model.photos.length > 0) {
-    const mediaGroup = model.photos.map(fileId => ({ type: 'photo', media: fileId }));
+    const mediaGroup = model.photos.map(url => ({ type: 'photo', media: url }));
     await ctx.replyWithMediaGroup(mediaGroup).catch((err) => {
-      console.error('⚠️ Ошибка отправки галереи:', err.message);
+      console.error('⚠️ Ошибка отправки фото (пропускаем):', err.message);
     });
   }
 
+  // 2. Описание и кнопки тарифов
   const p = model.prices;
   const keyboard = new InlineKeyboard()
     .text(`1 день — ${p['1d'].price.toLocaleString('ru-RU')} ₽`, `book_${modelKey}_1d`).row()
