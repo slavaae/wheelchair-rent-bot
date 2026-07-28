@@ -37,12 +37,18 @@ async function notifyAdminLog(ctx, actionText) {
 }
 
 // -------------------------------------------------------------
-// 📦 БАЗА ДАННЫХ МОДЕЛЕЙ И ЦЕН
+// 📦 БАЗА ДАННЫХ МОДЕЛЕЙ И ЦЕН (С ВОЗВРАЩЕННЫМИ ФОТО)
 // -------------------------------------------------------------
 const MODELS_INFO = {
   'ortonica620': {
     name: 'Ортоника 620',
-    specs: '🚀 Скорость: 6 км/ч\n⚡ Запас хода: 20 км\n⚖️ Вес: 26 кг\n🏋️ Макс. нагрузка: 120 кг\n🟢 Прочная и надежная модель.',
+    photos: [
+      'AgACAgIAAxkBAAMYamfVDXqYTHvBH6p6GFI-h_ahSwEAAjAjaxvS5jlL4lgiueYZa0kBAAMCAAN4AAM9BA',
+      'AgACAgIAAxkBAAMZamfVDYjblPSiCzhGuafvj_n-TtgAAjIjaxvS5jlLmYldsmw1hZ4BAAMCAAN4AAM9BA',
+      'AgACAgIAAxkBAAMaamfVDXOjhGMWrRjVy-jCwYdcZmYAAjEjaxvS5jlLz-X3Y-jJYn4BAAMCAAN4AAM9BA',
+      'AgACAgIAAxkBAAMbamfVDQ7fyrMzuw1T0DUoWBal4ecAAjMjaxvS5jlLWNYtVMUoeWoBAAMCAAN5AAM9BA',
+    ],
+    specs: '🚀 Скорость: 6 км/ч\n⚡ Запас хода: 20 км\n⚖️ Вес: 26 кг\n🏋️ Макс. нагрузка: 120 кг\n🟢 Доступная стоимость. Прочная конструкция, которую сложно повредить.',
     prices: {
       '1d': { name: '1 день', price: 2088, daily: 2088 },
       '3d': { name: '3 дня', price: 4475, daily: 1492 },
@@ -54,7 +60,12 @@ const MODELS_INFO = {
   },
   'ortonica650': {
     name: 'Ортоника 650',
-    specs: '🚀 Скорость: 6 км/ч\n⚡ Запас хода: 20 км\n⚖️ Вес: 23 кг\n🏋️ Макс. нагрузка: 130 кг\n🟢 Компактная модель для дома и прогулок.',
+    photos: [
+      'AgACAgIAAxkBAAN8amfaSC6refFdfAMxEUjXH1uYuzIAAkQjaxvS5jlLRbTOk14z6doBAAMCAAN5AAM9BA',
+      'AgACAgIAAxkBAAN9amfaSDhJJD6vHGpkMenOB94wdIIAAkUjaxvS5jlLlP-fPJA6JHABAAMCAAN4AAM9BA',
+      'AgACAgIAAxkBAAN-amfaSMXWckW-9JDEtzNrBvwrWcwAAkYjaxvS5jlLIgwors7eKCoBAAMCAAN5AAM9BA',
+    ],
+    specs: '🚀 Скорость: 6 км/ч\n⚡ Запас хода: 20 км\n⚖️ Вес: 23 кг\n🏋️ Макс. нагрузка: 130 кг\n🟢 Самая компактная модель. Идеальна для квартиры.',
     prices: {
       '1d': { name: '1 день', price: 2334, daily: 2334 },
       '3d': { name: '3 дня', price: 5002, daily: 1667 },
@@ -66,7 +77,12 @@ const MODELS_INFO = {
   },
   'ortonica690': {
     name: 'Ортоника 690',
-    specs: '🚀 Скорость: 8 км/ч\n⚡ Запас хода: 20 км\n⚖️ Вес: 25 кг\n🏋️ Макс. нагрузка: 150 кг\n🟢 Усиленная конструкция и комфортное сиденье.',
+    photos: [
+      'AgACAgIAAxkBAANXamfaAAHiqFH1yBQ6UR0_LC9E62F_AAI2I2sb0uY5SzffZnbqGTx5AQADAgADeQADPQQ',
+      'AgACAgIAAxkBAANYamfaAAFSA74kqbD8p5Z-USgiDf2BAAI3I2sb0uY5SzP3adhBiqgfAQADAgADeAADPQQ',
+      'AgACAgIAAxkBAANZamfaAAHLL1IS6tEIawvFrrxQop8DAAI4I2sb0uY5S3FyWmpfdi1PAQADAgADeAADPQQ',
+    ],
+    specs: '🚀 Скорость: 8 км/ч\n⚡ Запас хода: 20 км\n⚖️ Вес: 25 кг\n🏋️ Макс. нагрузка: 150 кг\n🟢 Стильное кресло с приятной эргономикой.',
     prices: {
       '1d': { name: '1 день', price: 2580, daily: 2580 },
       '3d': { name: '3 дня', price: 5528, daily: 1843 },
@@ -78,7 +94,12 @@ const MODELS_INFO = {
   },
   'ortonica750': {
     name: 'Ортоника 750',
-    specs: '🚀 Скорость: 6 км/ч\n⚡ Запас хода: 25 км\n⚖️ Вес: 43 кг\n🏋️ Макс. нагрузка: 120 кг\n🟢 Всенаправленные колеса (маневренность 360°).',
+    photos: [
+      'AgACAgIAAxkBAANtamfaOfBzPz1bcengmeqXScRqQ2gAAj0jaxvS5jlL-ks51_fZah4BAAMCAAN4AAM9BA',
+      'AgACAgIAAxkBAANuamfaOX9vYbFLpINL6z_KfqEmlGQAAj4jaxvS5jlLgPYYSha1t6UBAAMCAAN4AAM9BA',
+      'AgACAgIAAxkBAANvamfaOfVcCzH-OmjqHo-RmJb4SxsAAj8jaxvS5jlL9Sl8vrEvGggBAAMCAAN5AAM9BA',
+    ],
+    specs: '🚀 Скорость: 6 км/ч\n⚡ Запас хода: 25 км\n⚖️ Вес: 43 кг\n🏋️ Макс. нагрузка: 120 кг\n🟢 Флагман со всенаправленными колесами.',
     prices: {
       '1d': { name: '1 день', price: 3069, daily: 3069 },
       '3d': { name: '3 дня', price: 6576, daily: 2192 },
@@ -133,11 +154,12 @@ bot.hears('🛵 Каталог колясок', async (ctx) => {
   await notifyAdminLog(ctx, 'Открыл «Каталог колясок»');
   await ctx.reply(
     '🛵 <b>Каталог электроколясок</b>\n\n' +
-    'Выберите модель для просмотра характеристик и тарифов:',
+    'Выберите модель для просмотра характеристик, фото и тарифов:',
     { parse_mode: 'HTML', reply_markup: getCatalogKeyboard() }
   );
 });
 
+// 🔥 ПРОСМОТР МОДЕЛИ (ОТПРАВКА КАРТОЧКИ С ФОТОГРАФИЯМИ)
 bot.callbackQuery(/^model_(.+)$/, async (ctx) => {
   const modelKey = ctx.match[1];
   const model = MODELS_INFO[modelKey];
@@ -147,6 +169,15 @@ bot.callbackQuery(/^model_(.+)$/, async (ctx) => {
   await notifyAdminLog(ctx, `Смотрит модель: ${model.name}`);
   await ctx.answerCallbackQuery().catch(() => {});
 
+  // 1. Безопасная отправка фотографий (если есть)
+  if (model.photos && model.photos.length > 0) {
+    const mediaGroup = model.photos.map(fileId => ({ type: 'photo', media: fileId }));
+    await ctx.replyWithMediaGroup(mediaGroup).catch((err) => {
+      console.error('⚠️ Ошибка отправки фото галереи (пропускаем):', err.message);
+    });
+  }
+
+  // 2. Клавиатура с ценами
   const p = model.prices;
   const keyboard = new InlineKeyboard()
     .text(`1 день — ${p['1d'].price.toLocaleString('ru-RU')} ₽`, `book_${modelKey}_1d`).row()
@@ -172,7 +203,7 @@ bot.callbackQuery('back_to_catalog', async (ctx) => {
 });
 
 // -------------------------------------------------------------
-// 🔥 ВЫБОР ПЕРИОДА АРЕНДЫ (БЕЗ НАВИСАНИЙ)
+// 🔥 ВЫБОР ПЕРИОДА АРЕНДЫ
 // -------------------------------------------------------------
 bot.callbackQuery(/^book_([^_]+)_(.+)$/, async (ctx) => {
   const modelKey = ctx.match[1];
@@ -256,7 +287,7 @@ bot.on('message', async (ctx, next) => {
     const booking = ctx.session.bookingData || {};
     ctx.session.step = 'idle';
 
-    // Запись в Гугл Таблицу (с защитой от падения бота)
+    // Запись в Google Таблицу (с защитой)
     try {
       await saveOrder({
         userId: ctx.from.id,
@@ -267,7 +298,7 @@ bot.on('message', async (ctx, next) => {
         period: booking.period || 'Не указан',
       });
     } catch (e) {
-      console.error(' Ошибка записи в Таблицу (клиенту всё равно ответили):', e.message);
+      console.error('⚠️ Ошибка записи в Таблицу (клиенту всё равно ответили):', e.message);
     }
 
     const finishText = 
@@ -295,7 +326,7 @@ bot.on('message', async (ctx, next) => {
         await ctx.api.sendMessage(process.env.ADMIN_CHAT_ID, adminMsg, { parse_mode: 'HTML' });
       }
     } catch (adminErr) {
-      console.error(' Ошибка отправки админу:', adminErr.message);
+      console.error('⚠️ Ошибка отправки админу:', adminErr.message);
     }
 
     return;
@@ -304,6 +335,9 @@ bot.on('message', async (ctx, next) => {
   return next();
 });
 
+// -------------------------------------------------------------
+// ИНФОРМАЦИОННЫЕ РАЗДЕЛЫ
+// -------------------------------------------------------------
 bot.hears('ℹ️ Условия аренды', async (ctx) => {
   await notifyAdminLog(ctx, 'Открыл «Условия аренды»');
   const text = 
