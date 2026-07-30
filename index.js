@@ -191,7 +191,7 @@ bot.hears('🛵 Каталог колясок', async (ctx) => {
   );
 });
 
-// 🔥 ОТПРАВКА КАРТОЧКИ С ФОТО И УДОБНЫМ СТРУКТУРИРОВАННЫМ ТЕКСТОМ
+// 🔥 ОТПРАВКА КАРТОЧКИ И ВСЕЙ ГАЛЕРЕИ ФОТОГРАФИЙ
 bot.callbackQuery(/^model_(.+)$/, async (ctx) => {
   const modelKey = ctx.match[1];
   const model = MODELS_INFO[modelKey];
@@ -201,6 +201,20 @@ bot.callbackQuery(/^model_(.+)$/, async (ctx) => {
   await notifyAdminLog(ctx, `Смотрит модель: ${model.name}`);
   await ctx.answerCallbackQuery().catch(() => {});
 
+  // 1. Отправляем ВСЕ фотографии модели альбомом (галереей)
+  if (model.photos && model.photos.length > 0) {
+    try {
+      const mediaGroup = model.photos.map(fileId => ({
+        type: 'photo',
+        media: fileId,
+      }));
+      await ctx.replyWithMediaGroup(mediaGroup);
+    } catch (err) {
+      console.error('⚠️ Ошибка отправки альбома фото:', err.message);
+    }
+  }
+
+  // 2. Клавиатура выбора срока
   const p = model.prices;
   const keyboard = new InlineKeyboard()
     .text(`1 день — ${p['1d'].price.toLocaleString('ru-RU')} ₽`, `book_${modelKey}_1d`).row()
@@ -218,26 +232,8 @@ bot.callbackQuery(/^model_(.+)$/, async (ctx) => {
     `💰 <b>Выберите срок аренды:</b>\n` +
     `<i>Чем дольше срок — тем ниже стоимость в сутки!</i>`;
 
-  let sentSuccessfully = false;
-
-  // Безопасная отправка обложки с кнопками
-  if (model.photos && model.photos.length > 0) {
-    try {
-      await ctx.replyWithPhoto(model.photos[0], {
-        caption: caption,
-        parse_mode: 'HTML',
-        reply_markup: keyboard,
-      });
-      sentSuccessfully = true;
-    } catch (err) {
-      console.error('⚠️ Не удалось отправить фото обложки:', err.message);
-    }
-  }
-
-  // Если фото не отправилось — выводим текстовую карточку
-  if (!sentSuccessfully) {
-    await ctx.reply(caption, { parse_mode: 'HTML', reply_markup: keyboard });
-  }
+  // 3. Отправляем текст карточки и интерактивные кнопки
+  await ctx.reply(caption, { parse_mode: 'HTML', reply_markup: keyboard });
 });
 
 bot.callbackQuery('back_to_catalog', async (ctx) => {
